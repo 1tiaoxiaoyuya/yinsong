@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>📘 错题本 · 单词管家</title>
+    <!-- SheetJS (XLSX) 轻量 Excel 导出 -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; }
+        body { background: #f2f6fc; padding: 16px 12px; min-height: 100vh; display: flex; justify-content: center; }
+        .app { max-width: 700px; width: 100%; }
+
+        /* 卡片设计 - 手机柔和 */
+        .card { background: #ffffff; border-radius: 28px; box-shadow: 0 6px 24px rgba(0, 20, 40, 0.06); padding: 20px 18px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); transition: all 0.1s; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 6px 10px; }
+        .card-header h3 { font-weight: 600; font-size: 17px; color: #0f1f2f; letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px; }
+        .badge { background: #eef3fa; color: #1f3a57; padding: 2px 14px; border-radius: 60px; font-size: 13px; font-weight: 500; }
+
+        /* 批量输入区 - 手机友好 */
+        .batch-area { display: flex; flex-direction: column; gap: 12px; }
+        .batch-textarea { width: 100%; }
+        .batch-textarea textarea { width: 100%; min-height: 100px; padding: 14px 16px; border: 1px solid #dce4ef; border-radius: 20px; font-size: 15px; background: #fafdff; resize: vertical; transition: 0.2s; line-height: 1.6; }
+        .batch-textarea textarea:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59, 124, 255, 0.12); }
+        .batch-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; }
+        .batch-actions .btn { padding: 12px 18px; border-radius: 60px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; background: #f1f5fb; color: #1f2f3f; transition: 0.15s; display: inline-flex; align-items: center; gap: 6px; flex: 1 0 auto; justify-content: center; min-width: 80px; }
+        .btn-primary { background: #1f2f3f; color: white; box-shadow: 0 4px 12px rgba(0, 20, 40, 0.08); }
+        .btn-primary:active { background: #2f4055; transform: scale(0.97); }
+        .btn-outline { background: transparent; border: 1px solid #d0dbe8; }
+        .btn-outline:active { background: #eaf0f8; }
+        .btn-success { background: #0f7b4b; color: white; }
+        .btn-success:active { background: #0e6a40; }
+        .btn-danger { background: #d13e4a; color: white; }
+        .btn-danger:active { background: #b7343f; }
+        .btn-warning { background: #d48c2c; color: white; }
+        .btn-warning:active { background: #bd7a24; }
+        .btn-light { background: #eef3fa; color: #1f2f3f; }
+        .btn-light:active { background: #dce6f0; }
+
+        .template-tip { font-size: 13px; color: #5a6f84; background: #f2f8ff; padding: 6px 16px; border-radius: 40px; display: inline-block; margin-top: 2px; width: fit-content; }
+        .template-tip code { background: #e4ecf6; padding: 2px 10px; border-radius: 30px; font-size: 12px; }
+
+        /* 表格 - 移动端横向滚动 */
+        .table-wrap { overflow-x: auto; border-radius: 20px; border: 1px solid #eef3fa; margin-top: 4px; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 380px; }
+        th { text-align: left; padding: 12px 12px; background: #f8fbfe; color: #1f3347; font-weight: 600; font-size: 13px; border-bottom: 1px solid #e6edf6; }
+        td { padding: 10px 12px; border-bottom: 1px solid #edf2f8; vertical-align: middle; background: white; }
+        .col-id { color: #8899aa; font-weight: 450; width: 32px; font-size: 13px; }
+        .col-actions { width: 48px; text-align: right; padding-right: 6px; }
+        .del-btn { background: none; border: none; color: #b4c4d8; font-size: 20px; cursor: pointer; padding: 4px 6px; border-radius: 30px; line-height: 1; }
+        .del-btn:active { color: #d13e4a; background: #fef0f2; }
+        .empty-placeholder { text-align: center; color: #b0c2d6; padding: 32px 16px; font-size: 15px; }
+
+        /* 工具栏 - 手机堆叠 */
+        .toolbar { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; background: #f8fbfe; padding: 10px 14px; border-radius: 60px; width: 100%; justify-content: flex-start; }
+        .toolbar-group label { font-size: 14px; font-weight: 500; color: #1f3347; }
+        .toolbar-group input[type="number"] { width: 64px; padding: 8px 8px; border: 1px solid #dce4ef; border-radius: 40px; font-size: 15px; background: white; text-align: center; }
+        .toolbar-group select { padding: 8px 12px; border: 1px solid #dce4ef; border-radius: 40px; background: white; font-size: 14px; color: #1f2f3f; }
+        .toolbar .btn { padding: 10px 16px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f5fb; color: #1f2f3f; display: inline-flex; align-items: center; gap: 4px; justify-content: center; flex: 1 0 auto; min-width: 70px; }
+        .toolbar .btn-primary { background: #1f2f3f; color: white; }
+        .toolbar .btn-primary:active { background: #2f4055; }
+        .toolbar .btn-success { background: #0f7b4b; color: white; }
+        .toolbar .btn-success:active { background: #0e6a40; }
+
+        .backup-area { border-top: 1px solid #e6edf6; padding-top: 16px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .backup-area .btn { padding: 8px 18px; border-radius: 40px; background: #f1f5fb; border: none; font-size: 14px; font-weight: 500; cursor: pointer; flex: 1 0 auto; }
+        .backup-area .btn:active { background: #dce6f0; }
+
+        /* 标题 */
+        .app-title { font-weight: 650; font-size: 24px; letter-spacing: -0.02em; color: #0f1f2f; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .app-title span { font-size: 15px; font-weight: 400; color: #4a6a85; background: #eef3fa; padding: 2px 18px; border-radius: 60px; }
+
+        /* 手机小屏微调 */
+        @media (max-width: 480px) {
+            body { padding: 12px 8px; }
+            .card { padding: 16px 14px; border-radius: 24px; }
+            .batch-actions .btn { font-size: 14px; padding: 10px 14px; }
+            .toolbar-group { border-radius: 30px; padding: 8px 12px; }
+            .toolbar .btn { font-size: 13px; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="app-title">
+        <span>📘 错题本</span>
+        <span>单词管家</span>
+    </div>
+
+    <!-- 批量新增卡片 -->
+    <div class="card">
+        <div class="card-header">
+            <h3>✚ 批量加入</h3>
+            <span class="badge" id="wordCountBadge">0 个单词</span>
+        </div>
+        <div class="batch-area">
+            <div class="batch-textarea">
+                <textarea id="batchInput" placeholder="每行一个：中文, 英文, 词性&#10;例如：&#10;苹果, apple, n.&#10;跑, run, v."></textarea>
+                <div class="template-tip">
+                    ⚡ 每行一条 · 用 <code>,</code> 或 <code>Tab</code> 分隔
+                </div>
+            </div>
+            <div class="batch-actions">
+                <button class="btn btn-primary" id="batchAddBtn">➕ 批量添加</button>
+                <button class="btn btn-outline" id="clearAllBtn">🗑️ 清空</button>
+                <button class="btn btn-outline" id="addExampleBtn">📋 示例</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 单词列表卡片 -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📋 单词列表</h3>
+            <span style="font-size: 13px; color: #4a6a85;">点击 <span style="background:#eef3fa; padding:0 8px; border-radius:30px;">✕</span> 删除</span>
+        </div>
+        <div class="table-wrap" id="tableWrap">
+            <table>
+                <thead>
+                    <tr><th class="col-id">#</th><th>中文</th><th>英文</th><th>词性</th><th class="col-actions"></th></tr>
+                </thead>
+                <tbody id="wordTableBody">
+                    <!-- 动态渲染 -->
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 14px;">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <label>📤 导出</label>
+                    <button class="btn btn-success" id="exportAllBtn">完整表格</button>
+                </div>
+                <div class="toolbar-group">
+                    <label>🎲 随机抽</label>
+                    <input type="number" id="randomCount" value="5" min="1" max="200">
+                    <span style="color:#4a6a85; font-size:14px;">个</span>
+                    <select id="hintMode">
+                        <option value="chinese">中文提示</option>
+                        <option value="english">英文提示</option>
+                    </select>
+                    <button class="btn btn-primary" id="exportRandomBtn">生成考试表</button>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;">
+                    <button class="btn btn-light" id="exportJSONBtn" style="flex:1;">💾 备份 JSON</button>
+                    <label class="btn btn-light" style="flex:1; cursor:pointer; display: inline-flex; gap:6px; align-items:center; justify-content:center;">
+                        📂 导入备份
+                        <input type="file" id="fileInput" accept=".json" style="display:none;">
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="backup-area">
+            <span style="font-size:13px; color:#4a6a85;">💾 自动保存在本机 · 建议定期备份</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 核心数据 ----------
+    const STORAGE_KEY = 'wordMistakeBook';
+    let words = [];
+
+    // ---------- 初始化 ----------
+    function loadData() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try { words = JSON.parse(raw); } catch(e) { words = []; }
+        } else {
+            words = [
+                { id: Date.now()+1, chinese: '苹果', english: 'apple', pos: 'n.' },
+                { id: Date.now()+2, chinese: '跑', english: 'run', pos: 'v.' },
+                { id: Date.now()+3, chinese: '美丽的', english: 'beautiful', pos: 'adj.' },
+                { id: Date.now()+4, chinese: '书', english: 'book', pos: 'n.' },
+                { id: Date.now()+5, chinese: '快乐', english: 'happy', pos: 'adj.' },
+            ];
+            saveData();
+        }
+        words.forEach(w => { if (!w.id) w.id = Date.now() + Math.random(); });
+        render();
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
+        updateBadge();
+    }
+
+    function updateBadge() {
+        document.getElementById('wordCountBadge').textContent = `${words.length} 个单词`;
+    }
+
+    // ---------- 渲染 ----------
+    function render() {
+        const tbody = document.getElementById('wordTableBody');
+        if (words.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-placeholder">✨ 还没有单词，使用上方批量添加</td></tr>`;
+        } else {
+            tbody.innerHTML = words.map((w, idx) => `
+                <tr class="word-row">
+                    <td class="col-id">${idx+1}</td>
+                    <td>${escapeHtml(w.chinese)}</td>
+                    <td>${escapeHtml(w.english)}</td>
+                    <td>${escapeHtml(w.pos)}</td>
+                    <td class="col-actions"><button class="del-btn" data-id="${w.id}">✕</button></td>
+                </tr>
+            `).join('');
+            tbody.querySelectorAll('.del-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = Number(this.dataset.id);
+                    deleteSingleWord(id);
+                });
+            });
+        }
+        updateBadge();
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ---------- 批量添加 ----------
+    function batchAddFromInput() {
+        const raw = document.getElementById('batchInput').value;
+        if (!raw.trim()) { alert('请输入单词，每行一个。'); return; }
+        const lines = raw.split('\n').filter(line => line.trim() !== '');
+        let added = 0;
+        const errors = [];
+        lines.forEach((line, index) => {
+            let parts = line.split(/[,，\t]+/).map(s => s.trim());
+            if (parts.length < 2) {
+                errors.push(`第 ${index+1} 行格式错误：至少需要中文和英文`);
+                return;
+            }
+            const chinese = parts[0] || '';
+            const english = parts[1] || '';
+            const pos = parts[2] || '';
+            if (!chinese || !english) {
+                errors.push(`第 ${index+1} 行中文或英文为空`);
+                return;
+            }
+            words.push({ id: Date.now() + Math.random() + index, chinese, english, pos });
+            added++;
+        });
+        if (added > 0) {
+            saveData();
+            render();
+            document.getElementById('batchInput').value = '';
+        }
+        if (errors.length > 0) {
+            alert(`成功添加 ${added} 个单词，但以下行有问题：\n${errors.join('\n')}`);
+        } else if (added > 0) {
+            // 静默成功
+        } else {
+            alert('没有成功添加任何单词，请检查格式（中文, 英文, 词性）');
+        }
+    }
+
+    function deleteSingleWord(id) {
+        if (!confirm('移除该单词？')) return;
+        words = words.filter(w => w.id !== id);
+        saveData();
+        render();
+    }
+
+    function clearAll() {
+        if (words.length === 0) return;
+        if (!confirm(`确定删除全部 ${words.length} 个单词？`)) return;
+        words = [];
+        saveData();
+        render();
+    }
+
+    function fillExample() {
+        const example = `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n巨大的, huge, adj.\n游泳, swim, v.`;
+        document.getElementById('batchInput').value = example;
+    }
+
+    // ---------- 导出 Excel ----------
+    function exportExcel(wordsData, title, hintMode = null) {
+        if (!wordsData || wordsData.length === 0) {
+            alert('没有单词可导出');
+            return;
+        }
+        const header = ['中文', '英文', '词性'];
+        let dataRows = [];
+        if (hintMode === 'chinese') {
+            dataRows = wordsData.map(w => [w.chinese, '', '']);
+        } else if (hintMode === 'english') {
+            dataRows = wordsData.map(w => ['', w.english, '']);
+        } else {
+            dataRows = wordsData.map(w => [w.chinese, w.english, w.pos]);
+        }
+        const wsData = [
+            [title],
+            header,
+            ...dataRows
+        ];
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = [{ wch: 22 }, { wch: 22 }, { wch: 16 }];
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+        const fileName = `${title}_${new Date().toISOString().slice(0,10)}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    }
+
+    // ---------- 事件绑定 ----------
+    document.getElementById('batchAddBtn').addEventListener('click', batchAddFromInput);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+    document.getElementById('addExampleBtn').addEventListener('click', fillExample);
+
+    document.getElementById('exportAllBtn').addEventListener('click', () => {
+        if (words.length === 0) { alert('错题本为空'); return; }
+        exportExcel(words, '英语错题本_完整', null);
+    });
+
+    document.getElementById('exportRandomBtn').addEventListener('click', () => {
+        const countInput = document.getElementById('randomCount');
+        let n = parseInt(countInput.value) || 5;
+        if (n <= 0) n = 1;
+        if (n > words.length) {
+            alert(`当前共 ${words.length} 个单词，已调整为全部`);
+            n = words.length;
+        }
+        if (n === 0) { alert('错题本为空'); return; }
+        const hintMode = document.getElementById('hintMode').value;
+        const shuffled = [...words];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const selected = shuffled.slice(0, n);
+        const modeLabel = hintMode === 'chinese' ? '中文提示' : '英文提示';
+        exportExcel(selected, `错题本_随机${n}个_${modeLabel}`, hintMode);
+    });
+
+    document.getElementById('exportJSONBtn').addEventListener('click', () => {
+        const dataStr = JSON.stringify(words, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wordMistake_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                if (!Array.isArray(imported)) throw new Error('数据不是数组');
+                if (imported.length > 0 && (!imported[0].chinese || !imported[0].english)) {
+                    throw new Error('缺少 chinese 或 english 字段');
+                }
+                if (!confirm(`导入 ${imported.length} 个单词，将覆盖当前所有数据`)) return;
+                words = imported;
+                words.forEach(w => { if (!w.id) w.id = Date.now() + Math.random(); });
+                saveData();
+                render();
+            } catch(err) {
+                alert('导入失败: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        this.value = '';
+    });
+
+    // 快捷键 Ctrl+Enter 批量添加
+    document.getElementById('batchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            batchAddFromInput();
+        }
+    });
+
+    // 启动
+    loadData();
+</script>
+</body>
+</html>
