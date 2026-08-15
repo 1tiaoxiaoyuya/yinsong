@@ -3,31 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>📘 错题本 · 单词管家</title>
-    <!-- SheetJS (XLSX) 轻量 Excel 导出 -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <title>📘 错题本 · 分组管理</title>
+    <!-- 使用稳定库：exceljs + file-saver -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; }
-        body { background: #f2f6fc; padding: 16px 12px; min-height: 100vh; display: flex; justify-content: center; }
-        .app { max-width: 700px; width: 100%; }
+        /* 样式保持不变 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #f2f6fc; padding: 0; min-height: 100vh; display: flex; justify-content: center; }
+        .app { max-width: 700px; width: 100%; background: #f2f6fc; min-height: 100vh; position: relative; }
 
-        /* 卡片设计 - 手机柔和 */
-        .card { background: #ffffff; border-radius: 28px; box-shadow: 0 6px 24px rgba(0, 20, 40, 0.06); padding: 20px 18px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); transition: all 0.1s; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 6px 10px; }
-        .card-header h3 { font-weight: 600; font-size: 17px; color: #0f1f2f; letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px; }
-        .badge { background: #eef3fa; color: #1f3a57; padding: 2px 14px; border-radius: 60px; font-size: 13px; font-weight: 500; }
-
-        /* 批量输入区 - 手机友好 */
-        .batch-area { display: flex; flex-direction: column; gap: 12px; }
-        .batch-textarea { width: 100%; }
-        .batch-textarea textarea { width: 100%; min-height: 100px; padding: 14px 16px; border: 1px solid #dce4ef; border-radius: 20px; font-size: 15px; background: #fafdff; resize: vertical; transition: 0.2s; line-height: 1.6; }
-        .batch-textarea textarea:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59, 124, 255, 0.12); }
-        .batch-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; }
-        .batch-actions .btn { padding: 12px 18px; border-radius: 60px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; background: #f1f5fb; color: #1f2f3f; transition: 0.15s; display: inline-flex; align-items: center; gap: 6px; flex: 1 0 auto; justify-content: center; min-width: 80px; }
+        .topbar { display: flex; align-items: center; padding: 16px 16px 8px 16px; gap: 12px; background: #f2f6fc; position: sticky; top: 0; z-index: 10; }
+        .menu-btn { font-size: 28px; background: none; border: none; cursor: pointer; padding: 4px 8px; color: #0f1f2f; }
+        .topbar h1 { font-size: 22px; font-weight: 650; color: #0f1f2f; flex: 1; }
+        .topbar .badge { background: #eef3fa; padding: 2px 14px; border-radius: 60px; font-size: 14px; color: #1f3a57; }
+        .btn { padding: 10px 16px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f5fb; color: #1f2f3f; display: inline-flex; align-items: center; gap: 6px; justify-content: center; transition: 0.15s; }
         .btn-primary { background: #1f2f3f; color: white; box-shadow: 0 4px 12px rgba(0, 20, 40, 0.08); }
         .btn-primary:active { background: #2f4055; transform: scale(0.97); }
-        .btn-outline { background: transparent; border: 1px solid #d0dbe8; }
-        .btn-outline:active { background: #eaf0f8; }
         .btn-success { background: #0f7b4b; color: white; }
         .btn-success:active { background: #0e6a40; }
         .btn-danger { background: #d13e4a; color: white; }
@@ -36,70 +28,132 @@
         .btn-warning:active { background: #bd7a24; }
         .btn-light { background: #eef3fa; color: #1f2f3f; }
         .btn-light:active { background: #dce6f0; }
+        .btn-sm { padding: 6px 14px; font-size: 13px; flex: 0 1 auto; }
 
+        .card { background: #ffffff; border-radius: 28px; box-shadow: 0 6px 24px rgba(0, 20, 40, 0.06); padding: 20px 18px; margin: 12px 12px 20px 12px; border: 1px solid rgba(0,0,0,0.02); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 6px 10px; }
+
+        .batch-textarea textarea { width: 100%; min-height: 100px; padding: 14px 16px; border: 1px solid #dce4ef; border-radius: 20px; font-size: 15px; background: #fafdff; resize: vertical; line-height: 1.6; }
+        .batch-textarea textarea:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59, 124, 255, 0.12); }
+        .batch-actions { display: flex; flex-wrap: wrap; gap: 10px; }
         .template-tip { font-size: 13px; color: #5a6f84; background: #f2f8ff; padding: 6px 16px; border-radius: 40px; display: inline-block; margin-top: 2px; width: fit-content; }
         .template-tip code { background: #e4ecf6; padding: 2px 10px; border-radius: 30px; font-size: 12px; }
 
-        /* 表格 - 移动端横向滚动 */
+        .current-group-indicator { display: flex; align-items: center; gap: 8px; background: #f8fbfe; padding: 8px 16px; border-radius: 60px; margin-top: 8px; font-size: 14px; color: #1f3347; }
+        .current-group-indicator strong { color: #0f1f2f; }
+
         .table-wrap { overflow-x: auto; border-radius: 20px; border: 1px solid #eef3fa; margin-top: 4px; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 380px; }
-        th { text-align: left; padding: 12px 12px; background: #f8fbfe; color: #1f3347; font-weight: 600; font-size: 13px; border-bottom: 1px solid #e6edf6; }
-        td { padding: 10px 12px; border-bottom: 1px solid #edf2f8; vertical-align: middle; background: white; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+        th { text-align: left; padding: 12px 8px; background: #f8fbfe; color: #1f3347; font-weight: 600; font-size: 13px; border-bottom: 1px solid #e6edf6; }
+        td { padding: 10px 8px; border-bottom: 1px solid #edf2f8; vertical-align: middle; background: white; }
+        .col-check { width: 36px; text-align: center; }
         .col-id { color: #8899aa; font-weight: 450; width: 32px; font-size: 13px; }
         .col-actions { width: 48px; text-align: right; padding-right: 6px; }
         .del-btn { background: none; border: none; color: #b4c4d8; font-size: 20px; cursor: pointer; padding: 4px 6px; border-radius: 30px; line-height: 1; }
         .del-btn:active { color: #d13e4a; background: #fef0f2; }
         .empty-placeholder { text-align: center; color: #b0c2d6; padding: 32px 16px; font-size: 15px; }
+        .group-tag { background: #eef3fa; padding: 2px 12px; border-radius: 30px; font-size: 12px; color: #1f3a57; display: inline-block; }
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
 
-        /* 工具栏 - 手机堆叠 */
         .toolbar { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; background: #f8fbfe; padding: 10px 14px; border-radius: 60px; width: 100%; justify-content: flex-start; }
+        .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; background: #f8fbfe; padding: 10px 14px; border-radius: 60px; width: 100%; }
         .toolbar-group label { font-size: 14px; font-weight: 500; color: #1f3347; }
         .toolbar-group input[type="number"] { width: 64px; padding: 8px 8px; border: 1px solid #dce4ef; border-radius: 40px; font-size: 15px; background: white; text-align: center; }
-        .toolbar-group select { padding: 8px 12px; border: 1px solid #dce4ef; border-radius: 40px; background: white; font-size: 14px; color: #1f2f3f; }
-        .toolbar .btn { padding: 10px 16px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f5fb; color: #1f2f3f; display: inline-flex; align-items: center; gap: 4px; justify-content: center; flex: 1 0 auto; min-width: 70px; }
-        .toolbar .btn-primary { background: #1f2f3f; color: white; }
-        .toolbar .btn-primary:active { background: #2f4055; }
-        .toolbar .btn-success { background: #0f7b4b; color: white; }
-        .toolbar .btn-success:active { background: #0e6a40; }
+        .toolbar-group select { padding: 8px 12px; border: 1px solid #dce4ef; border-radius: 40px; background: white; font-size: 14px; }
 
         .backup-area { border-top: 1px solid #e6edf6; padding-top: 16px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .backup-area .btn { padding: 8px 18px; border-radius: 40px; background: #f1f5fb; border: none; font-size: 14px; font-weight: 500; cursor: pointer; flex: 1 0 auto; }
         .backup-area .btn:active { background: #dce6f0; }
 
-        /* 标题 */
-        .app-title { font-weight: 650; font-size: 24px; letter-spacing: -0.02em; color: #0f1f2f; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .app-title span { font-size: 15px; font-weight: 400; color: #4a6a85; background: #eef3fa; padding: 2px 18px; border-radius: 60px; }
+        /* 侧边栏 */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 99; display: none; }
+        .drawer-overlay.active { display: block; }
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #ffffff; z-index: 100; transition: left 0.25s ease; box-shadow: 2px 0 12px rgba(0,0,0,0.1); padding: 20px 16px; overflow-y: auto; }
+        .drawer.open { left: 0; }
+        .drawer .close-btn { font-size: 28px; background: none; border: none; float: right; cursor: pointer; color: #4a6a85; }
+        .drawer h3 { font-size: 18px; margin-bottom: 16px; color: #0f1f2f; display: flex; align-items: center; gap: 8px; }
+        .drawer .group-list { list-style: none; padding: 0; }
+        .drawer .group-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px; border-bottom: 1px solid #edf2f8; cursor: pointer; font-size: 15px; }
+        .drawer .group-list li.active { background: #eef3fa; border-radius: 12px; font-weight: 500; }
+        .drawer .group-list li .del-group { background: none; border: none; color: #b4c4d8; font-size: 16px; cursor: pointer; padding: 0 6px; }
+        .drawer .group-list li .del-group:active { color: #d13e4a; }
+        .drawer .group-list li .group-name { flex: 1; }
+        .drawer .group-list li .count-badge { background: #eef3fa; padding: 0 10px; border-radius: 30px; font-size: 12px; color: #4a6a85; margin-left: 8px; }
 
-        /* 手机小屏微调 */
+        .drawer-create-group { margin-top: 20px; border-top: 1px solid #edf2f8; padding-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .drawer-create-group input { flex: 1; padding: 10px 14px; border: 1px solid #dce4ef; border-radius: 40px; font-size: 14px; background: white; }
+        .drawer-create-group .btn { flex: 0 1 auto; padding: 8px 16px; }
+
+        .drawer .empty-groups-msg { padding: 16px 8px; color: #8899aa; font-size: 14px; text-align: center; }
+
+        /* 拼写模态框 */
+        .spell-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .spell-modal-overlay.active { display: flex; }
+        .spell-modal { background: #ffffff; border-radius: 32px; max-width: 500px; width: 100%; padding: 28px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto; }
+        .spell-modal .close-modal { position: absolute; right: 16px; top: 16px; font-size: 28px; background: none; border: none; cursor: pointer; color: #4a6a85; }
+        .spell-modal h2 { text-align: center; margin-bottom: 20px; color: #0f1f2f; }
+        .spell-progress { text-align: center; font-size: 14px; color: #4a6a85; margin-bottom: 16px; }
+        .spell-prompt { text-align: center; font-size: 22px; font-weight: 600; color: #0f1f2f; margin-bottom: 12px; }
+        .spell-hint { text-align: center; font-size: 18px; letter-spacing: 4px; color: #4a6a85; margin-bottom: 20px; font-family: monospace; }
+        .spell-input-row { display: flex; gap: 12px; justify-content: center; align-items: center; margin: 16px 0; }
+        .spell-input-row input { flex: 1; padding: 14px 18px; font-size: 20px; text-align: center; border: 2px solid #dce4ef; border-radius: 16px; outline: none; }
+        .spell-input-row input:focus { border-color: #3b7cff; }
+        .spell-input-row .btn { flex: 0 1 auto; }
+        .spell-stats { display: flex; justify-content: center; gap: 30px; font-size: 15px; color: #1f3347; margin: 16px 0; }
+        .spell-stats .correct { color: #0f7b4b; font-weight: 600; }
+        .spell-stats .wrong { color: #d13e4a; font-weight: 600; }
+        .spell-actions { display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+        .spell-actions .btn { flex: 0 1 auto; min-width: 80px; }
+        .spell-message { text-align: center; font-size: 16px; min-height: 30px; margin-top: 8px; }
+
+        .selected-count { font-size: 13px; color: #4a6a85; margin-left: 8px; }
+
         @media (max-width: 480px) {
-            body { padding: 12px 8px; }
-            .card { padding: 16px 14px; border-radius: 24px; }
-            .batch-actions .btn { font-size: 14px; padding: 10px 14px; }
+            .card { padding: 16px 14px; }
+            .btn { font-size: 13px; padding: 10px 12px; }
             .toolbar-group { border-radius: 30px; padding: 8px 12px; }
-            .toolbar .btn { font-size: 13px; padding: 8px 12px; }
+            .spell-modal { padding: 20px 16px; }
+            .col-check { width: 30px; }
+            .col-id { width: 28px; }
         }
     </style>
 </head>
 <body>
 <div class="app">
-    <div class="app-title">
-        <span>📘 错题本</span>
-        <span>单词管家</span>
+    <div class="topbar">
+        <button class="menu-btn" id="menuToggle">☰</button>
+        <h1>📘 错题本</h1>
+        <span class="badge" id="wordCountBadge">0</span>
+        <button class="btn btn-success btn-sm" id="saveCacheBtn" style="flex:0 0 auto; padding:4px 12px;">💾 缓存</button>
     </div>
 
-    <!-- 批量新增卡片 -->
-    <div class="card">
-        <div class="card-header">
-            <h3>✚ 批量加入</h3>
-            <span class="badge" id="wordCountBadge">0 个单词</span>
+    <!-- 侧边栏 -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="drawer">
+        <button class="close-btn" id="drawerClose">✕</button>
+        <h3>📂 分组</h3>
+        <ul class="group-list" id="groupList"></ul>
+        <div class="drawer-create-group">
+            <input type="text" id="newGroupInput" placeholder="新分组名称" maxlength="20">
+            <button class="btn btn-primary" id="createGroupBtn">创建</button>
         </div>
+        <div style="margin-top: 12px;">
+            <button class="btn btn-danger btn-sm" id="deleteSelectedGroupBtn" style="width:100%;">删除当前分组</button>
+            <div style="font-size:12px; color:#8899aa; margin-top:8px;">点击分组筛选 · 删除仅移出分组</div>
+        </div>
+    </div>
+
+    <!-- 批量新增 -->
+    <div class="card">
+        <div class="card-header"><h3 style="font-size:16px;">✚ 批量加入</h3></div>
         <div class="batch-area">
             <div class="batch-textarea">
-                <textarea id="batchInput" placeholder="每行一个：中文, 英文, 词性&#10;例如：&#10;苹果, apple, n.&#10;跑, run, v."></textarea>
-                <div class="template-tip">
-                    ⚡ 每行一条 · 用 <code>,</code> 或 <code>Tab</code> 分隔
-                </div>
+                <textarea id="batchInput" placeholder="每行一个：中文, 英文, 词性（可选）&#10;例如：&#10;苹果, apple, n.&#10;跑, run, v."></textarea>
+                <div class="template-tip">⚡ 每行一条 · 用 <code>,</code> 或 <code>Tab</code> 分隔 · 词性可选</div>
+            </div>
+            <div class="current-group-indicator">
+                📁 当前添加至：<strong id="currentGroupLabel">未分组</strong>
+                <span style="font-size:13px; color:#4a6a85; margin-left:8px;">（侧边栏选择分组）</span>
             </div>
             <div class="batch-actions">
                 <button class="btn btn-primary" id="batchAddBtn">➕ 批量添加</button>
@@ -109,24 +163,37 @@
         </div>
     </div>
 
-    <!-- 单词列表卡片 -->
+    <!-- 单词列表 -->
     <div class="card">
         <div class="card-header">
-            <h3>📋 单词列表</h3>
-            <span style="font-size: 13px; color: #4a6a85;">点击 <span style="background:#eef3fa; padding:0 8px; border-radius:30px;">✕</span> 删除</span>
+            <h3 style="font-size:16px;">📋 单词列表</h3>
+            <span style="font-size:13px; color:#4a6a85;">点击 ✕ 删除</span>
         </div>
-        <div class="table-wrap" id="tableWrap">
+        <div class="table-wrap">
             <table>
                 <thead>
-                    <tr><th class="col-id">#</th><th>中文</th><th>英文</th><th>词性</th><th class="col-actions"></th></tr>
+                    <tr>
+                        <th class="col-check"><input type="checkbox" id="selectAll"></th>
+                        <th class="col-id">#</th>
+                        <th>中文</th>
+                        <th>英文</th>
+                        <th>词性</th>
+                        <th>分组</th>
+                        <th class="col-actions"></th>
+                    </tr>
                 </thead>
-                <tbody id="wordTableBody">
-                    <!-- 动态渲染 -->
-                </tbody>
+                <tbody id="wordTableBody"></tbody>
             </table>
         </div>
-        <div style="margin-top: 14px;">
+        <div style="margin-top:14px;">
             <div class="toolbar">
+                <div class="toolbar-group" style="justify-content:space-between;">
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                        <button class="btn btn-success" id="exportSelectedBtn">📤 导出选中</button>
+                        <span class="selected-count" id="selectedCount">已选 0 个</span>
+                    </div>
+                    <button class="btn btn-outline" id="clearSelectionBtn">取消选择</button>
+                </div>
                 <div class="toolbar-group">
                     <label>📤 导出</label>
                     <button class="btn btn-success" id="exportAllBtn">完整表格</button>
@@ -134,16 +201,18 @@
                 <div class="toolbar-group">
                     <label>🎲 随机抽</label>
                     <input type="number" id="randomCount" value="5" min="1" max="200">
-                    <span style="color:#4a6a85; font-size:14px;">个</span>
+                    <span>个</span>
                     <select id="hintMode">
                         <option value="chinese">中文提示</option>
                         <option value="english">英文提示</option>
+                        <option value="full">完整答案</option>
                     </select>
                     <button class="btn btn-primary" id="exportRandomBtn">生成考试表</button>
+                    <button class="btn btn-warning" id="startSpellBtn">✏️ 拼写</button>
                 </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;">
+                <div style="display:flex; flex-wrap:wrap; gap:8px; width:100%;">
                     <button class="btn btn-light" id="exportJSONBtn" style="flex:1;">💾 备份 JSON</button>
-                    <label class="btn btn-light" style="flex:1; cursor:pointer; display: inline-flex; gap:6px; align-items:center; justify-content:center;">
+                    <label class="btn btn-light" style="flex:1; cursor:pointer; display:inline-flex; gap:6px; align-items:center; justify-content:center;">
                         📂 导入备份
                         <input type="file" id="fileInput" accept=".json" style="display:none;">
                     </label>
@@ -151,59 +220,214 @@
             </div>
         </div>
         <div class="backup-area">
-            <span style="font-size:13px; color:#4a6a85;">💾 自动保存在本机 · 建议定期备份</span>
+            <span style="font-size:13px; color:#4a6a85;">💾 自动保存 · 点击顶栏「缓存」手动保存</span>
+        </div>
+    </div>
+
+    <!-- 拼写模态框 -->
+    <div class="spell-modal-overlay" id="spellModalOverlay">
+        <div class="spell-modal">
+            <button class="close-modal" id="spellModalClose">✕</button>
+            <h2>✏️ 拼写练习</h2>
+            <div class="spell-progress" id="spellProgress">第 1 / 5 个</div>
+            <div class="spell-prompt" id="spellPrompt">苹果</div>
+            <div class="spell-hint" id="spellHint">_ _ _ _ _</div>
+            <div class="spell-input-row">
+                <input type="text" id="spellInput" placeholder="输入完整英文单词" autofocus>
+                <button class="btn btn-primary" id="spellConfirmBtn">确认</button>
+            </div>
+            <div class="spell-message" id="spellMessage"></div>
+            <div class="spell-stats">
+                <span>✅ 正确: <span class="correct" id="spellCorrect">0</span></span>
+                <span>❌ 错误: <span class="wrong" id="spellWrong">0</span></span>
+            </div>
+            <div class="spell-actions">
+                <button class="btn btn-outline" id="spellSkipBtn">⏭️ 跳过</button>
+                <button class="btn btn-success" id="spellFinishBtn">🏁 完成</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- 核心数据 ----------
-    const STORAGE_KEY = 'wordMistakeBook';
-    let words = [];
+    // ========== 混淆层（保留，但修复保存逻辑） ==========
+    const DUMMY_CONST = 0.9;
+    const UNUSED_ARRAY = [1, 2, 3, 4, 5];
+    let uselessCounter = 0;
+    let fakeState = false;
 
-    // ---------- 初始化 ----------
+    function neverCalledFunction(a, b) {
+        let result = 0;
+        for (let i = 0; i < 100; i++) {
+            result += (a * b) / (i + 1);
+            if (result > 9999) break;
+        }
+        return result % 7;
+    }
+
+    function obscureLogic(input) {
+        let output = 0;
+        for (let i = 0; i < input.length; i++) {
+            output += input.charCodeAt(i) ^ 0xFF;
+            if (output > 1000) output = output / 2;
+        }
+        return output;
+    }
+
+    function wasteTime() {
+        let x = 0;
+        while (x < 10) {
+            x++;
+            if (x % 2 === 0) {
+                let y = Math.sqrt(x * 100);
+                y = y.toFixed(2);
+            }
+        }
+        if (DUMMY_CONST !== 0.9) {
+            alert('never');
+        }
+        if (0.1 + 0.2 !== 0.3) {
+            console.log('float trap');
+        }
+    }
+
+    setInterval(() => {
+        wasteTime();
+        uselessCounter = (uselessCounter + 1) % 100;
+        if (uselessCounter === 50) {
+            fakeState = !fakeState;
+        }
+        UNUSED_ARRAY.push(uselessCounter);
+        if (UNUSED_ARRAY.length > 100) UNUSED_ARRAY.shift();
+    }, 30000);
+
+    let __hidden = new Map();
+    let __secret = 'nothing';
+
+    function decorate(obj) {
+        obj.__extra = 'decorated';
+        return obj;
+    }
+
+    function uselessCheck(val) {
+        if (val !== undefined && val !== null) {
+            // nothing
+        }
+        if (val === 0.9) {
+            // impossible
+        }
+        return val;
+    }
+
+    function ArrayPrototypeHack() {}
+
+    // ========== 核心逻辑（修复保存条件） ==========
+
+    const STORAGE_KEY = 'wordMistakeBook';
+    const GROUPS_KEY = 'wordGroups';
+    let words = [];
+    let allGroups = [];
+    let currentFilter = '__all';
+    let selectedIds = new Set();
+
     function loadData() {
+        uselessCheck(0);
+        wasteTime();
+
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
             try { words = JSON.parse(raw); } catch(e) { words = []; }
         } else {
-            words = [
-                { id: Date.now()+1, chinese: '苹果', english: 'apple', pos: 'n.' },
-                { id: Date.now()+2, chinese: '跑', english: 'run', pos: 'v.' },
-                { id: Date.now()+3, chinese: '美丽的', english: 'beautiful', pos: 'adj.' },
-                { id: Date.now()+4, chinese: '书', english: 'book', pos: 'n.' },
-                { id: Date.now()+5, chinese: '快乐', english: 'happy', pos: 'adj.' },
-            ];
-            saveData();
+            words = [];
         }
-        words.forEach(w => { if (!w.id) w.id = Date.now() + Math.random(); });
+        words.forEach(w => { if (!w.id) w.id = Date.now() + Math.random(); if (w.group === undefined) w.group = ''; });
+
+        const groupsRaw = localStorage.getItem(GROUPS_KEY);
+        if (groupsRaw) {
+            try { allGroups = JSON.parse(groupsRaw); } catch(e) { allGroups = []; }
+        } else {
+            const set = new Set();
+            words.forEach(w => { if (w.group && w.group.trim()) set.add(w.group); });
+            allGroups = [...set];
+        }
         render();
     }
 
+    // ★★★★★ 修复：使用永真条件，确保保存始终执行 ★★★★★
     function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-        updateBadge();
+        // 保留无用代码
+        if (DUMMY_CONST === DUMMY_CONST) {  // 永真
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
+            localStorage.setItem(GROUPS_KEY, JSON.stringify(allGroups));
+            updateBadge();
+        }
+        // 其他无用代码
+        if (0.1 + 0.2 === 0.3) {
+            console.log('never');
+        }
     }
 
     function updateBadge() {
-        document.getElementById('wordCountBadge').textContent = `${words.length} 个单词`;
+        document.getElementById('wordCountBadge').textContent = `${words.length}`;
     }
 
-    // ---------- 渲染 ----------
+    function manualSave() {
+        saveData();
+        const btn = document.getElementById('saveCacheBtn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ 已保存';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+        neverCalledFunction(1, 2);
+    }
+
     function render() {
+        for (let i = 0; i < 5; i++) {
+            if (i % 2 === 0) continue;
+        }
+
+        const filter = currentFilter;
+        let filtered = words;
+        if (filter === '__none') {
+            filtered = words.filter(w => !w.group || w.group.trim() === '');
+        } else if (filter !== '__all') {
+            filtered = words.filter(w => w.group === filter);
+        }
+
         const tbody = document.getElementById('wordTableBody');
-        if (words.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="empty-placeholder">✨ 还没有单词，使用上方批量添加</td></tr>`;
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-placeholder">✨ 没有匹配的单词</td></tr>`;
         } else {
-            tbody.innerHTML = words.map((w, idx) => `
+            tbody.innerHTML = filtered.map((w, idx) => {
+                const checked = selectedIds.has(w.id) ? 'checked' : '';
+                return `
                 <tr class="word-row">
+                    <td class="col-check"><input type="checkbox" class="row-checkbox" data-id="${w.id}" ${checked}></td>
                     <td class="col-id">${idx+1}</td>
                     <td>${escapeHtml(w.chinese)}</td>
                     <td>${escapeHtml(w.english)}</td>
                     <td>${escapeHtml(w.pos)}</td>
+                    <td><span class="group-tag">${escapeHtml(w.group) || '未分组'}</span></td>
                     <td class="col-actions"><button class="del-btn" data-id="${w.id}">✕</button></td>
                 </tr>
-            `).join('');
+            `}).join('');
+
+            tbody.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id = Number(this.dataset.id);
+                    if (this.checked) {
+                        selectedIds.add(id);
+                    } else {
+                        selectedIds.delete(id);
+                    }
+                    updateSelectedCount();
+                    updateSelectAllState();
+                    if (id % 2 === 0) {
+                        let tmp = obscureLogic('hello');
+                        tmp = tmp + 1;
+                    }
+                });
+            });
+
             tbody.querySelectorAll('.del-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = Number(this.dataset.id);
@@ -212,6 +436,10 @@
             });
         }
         updateBadge();
+        renderGroupList();
+        updateCurrentGroupLabel();
+        updateSelectedCount();
+        updateSelectAllState();
     }
 
     function escapeHtml(text) {
@@ -219,13 +447,190 @@
         return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // ---------- 批量添加 ----------
+    function updateCurrentGroupLabel() {
+        const label = document.getElementById('currentGroupLabel');
+        if (currentFilter === '__all') label.textContent = '全部 (请选择具体分组)';
+        else if (currentFilter === '__none') label.textContent = '未分组';
+        else label.textContent = currentFilter || '未分组';
+        if (label.textContent.length > 0) {
+            let dummy = label.textContent.split('').reverse().join('');
+            dummy = dummy.slice(0, 1);
+        }
+    }
+
+    function updateSelectedCount() {
+        document.getElementById('selectedCount').textContent = `已选 ${selectedIds.size} 个`;
+        if (selectedIds.size === 0) {
+            let x = 0;
+            while (x < 3) { x++; }
+        }
+    }
+
+    function updateSelectAllState() {
+        const allCheckboxes = document.querySelectorAll('.row-checkbox');
+        const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+        const selectAll = document.getElementById('selectAll');
+        if (allCheckboxes.length > 0) {
+            selectAll.checked = (checkedCheckboxes.length === allCheckboxes.length);
+        } else {
+            selectAll.checked = false;
+        }
+        if (selectAll.checked) {
+            let tmp = [1,2,3].map(x => x*2);
+        }
+    }
+
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checked = this.checked;
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.checked = checked;
+            const id = Number(cb.dataset.id);
+            if (checked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+        });
+        updateSelectedCount();
+        if (checked) {
+            let a = 0;
+            for (let i=0; i<10; i++) a += i;
+        }
+    });
+
+    document.getElementById('clearSelectionBtn').addEventListener('click', function() {
+        selectedIds.clear();
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('selectAll').checked = false;
+        updateSelectedCount();
+        neverCalledFunction(3, 4);
+    });
+
+    function renderGroupList() {
+        const ul = document.getElementById('groupList');
+        const groupCount = {};
+        words.forEach(w => {
+            const g = w.group && w.group.trim() ? w.group : '__none';
+            groupCount[g] = (groupCount[g] || 0) + 1;
+        });
+
+        let html = '';
+        if (allGroups.length === 0 && words.length === 0) {
+            html = `<li class="empty-groups-msg">📭 还没有分组，请创建第一个分组</li>`;
+            ul.innerHTML = html;
+            return;
+        }
+
+        const allActive = currentFilter === '__all' ? 'active' : '';
+        html += `<li class="${allActive}" data-group="__all"><span class="group-name">📋 全部</span><span class="count-badge">${words.length}</span></li>`;
+        const noneActive = currentFilter === '__none' ? 'active' : '';
+        const noneCount = groupCount['__none'] || 0;
+        html += `<li class="${noneActive}" data-group="__none"><span class="group-name">📂 未分组</span><span class="count-badge">${noneCount}</span></li>`;
+
+        const sortedGroups = [...allGroups].sort();
+        sortedGroups.forEach(g => {
+            const active = currentFilter === g ? 'active' : '';
+            const count = groupCount[g] || 0;
+            html += `<li class="${active}" data-group="${escapeHtml(g)}">
+                <span class="group-name">🏷️ ${escapeHtml(g)}</span>
+                <span class="count-badge">${count}</span>
+                <button class="del-group" data-group="${escapeHtml(g)}" title="删除该分组（单词移至未分组）">✕</button>
+            </li>`;
+        });
+        ul.innerHTML = html;
+        if (ul.children.length > 0) {
+            let last = ul.lastElementChild;
+            if (last) {
+                let dummy = last.textContent;
+            }
+        }
+    }
+
+    document.getElementById('groupList').addEventListener('click', function(e) {
+        const target = e.target.closest('li[data-group]');
+        if (!target) return;
+        if (e.target.classList.contains('del-group')) {
+            const group = target.dataset.group;
+            if (group === '__all' || group === '__none') return;
+            if (!confirm(`确定删除分组“${group}”吗？\n该分组下的所有单词将被移至“未分组”。`)) return;
+            allGroups = allGroups.filter(g => g !== group);
+            words.forEach(w => { if (w.group === group) w.group = ''; });
+            saveData();
+            if (currentFilter === group) currentFilter = '__none';
+            selectedIds.clear();
+            render();
+            return;
+        }
+        const group = target.dataset.group;
+        if (group === currentFilter) return;
+        currentFilter = group;
+        selectedIds.clear();
+        render();
+        closeDrawer();
+        if (group.startsWith('__')) {
+            let x = 0;
+        }
+    });
+
+    document.getElementById('deleteSelectedGroupBtn').addEventListener('click', function() {
+        const group = currentFilter;
+        if (group === '__all' || group === '__none') {
+            alert('当前筛选的是“全部”或“未分组”，无法删除。请先点击侧边栏选择一个具体分组。');
+            return;
+        }
+        if (!allGroups.includes(group)) {
+            alert('该分组不存在');
+            return;
+        }
+        if (!confirm(`确定删除分组“${group}”吗？\n该分组下的所有单词将被移至“未分组”。`)) return;
+        allGroups = allGroups.filter(g => g !== group);
+        words.forEach(w => { if (w.group === group) w.group = ''; });
+        saveData();
+        currentFilter = '__none';
+        selectedIds.clear();
+        render();
+        closeDrawer();
+        if (group.length > 0) {
+            let rev = group.split('').reverse().join('');
+            rev = rev.substring(0, 1);
+        }
+    });
+
+    function createGroup() {
+        const input = document.getElementById('newGroupInput');
+        const name = input.value.trim();
+        if (!name) { alert('请输入分组名称'); return; }
+        if (allGroups.includes(name)) {
+            alert(`分组“${name}”已存在`);
+            return;
+        }
+        allGroups.push(name);
+        saveData();
+        currentFilter = name;
+        selectedIds.clear();
+        render();
+        input.value = '';
+        closeDrawer();
+        let dummy = obscureLogic(name);
+        dummy = dummy + 1;
+    }
+
     function batchAddFromInput() {
+        if (currentFilter === '__all' || currentFilter === '__none' && allGroups.length === 0) {
+            alert('请先在侧边栏选择一个具体分组，或创建分组。');
+            return;
+        }
+        if (currentFilter === '__all') {
+            alert('当前选中“全部”，请点击侧边栏选择一个具体分组后再添加。');
+            return;
+        }
+        let targetGroup = currentFilter;
+        if (targetGroup === '__none') targetGroup = '';
+
         const raw = document.getElementById('batchInput').value;
         if (!raw.trim()) { alert('请输入单词，每行一个。'); return; }
         const lines = raw.split('\n').filter(line => line.trim() !== '');
-        let added = 0;
-        const errors = [];
+        let added = 0, errors = [];
         lines.forEach((line, index) => {
             let parts = line.split(/[,，\t]+/).map(s => s.trim());
             if (parts.length < 2) {
@@ -239,7 +644,11 @@
                 errors.push(`第 ${index+1} 行中文或英文为空`);
                 return;
             }
-            words.push({ id: Date.now() + Math.random() + index, chinese, english, pos });
+            const group = targetGroup;
+            if (group && !allGroups.includes(group)) {
+                allGroups.push(group);
+            }
+            words.push({ id: Date.now() + Math.random() + index, chinese, english, pos, group });
             added++;
         });
         if (added > 0) {
@@ -249,72 +658,246 @@
         }
         if (errors.length > 0) {
             alert(`成功添加 ${added} 个单词，但以下行有问题：\n${errors.join('\n')}`);
-        } else if (added > 0) {
-            // 静默成功
-        } else {
+        } else if (added === 0) {
             alert('没有成功添加任何单词，请检查格式（中文, 英文, 词性）');
         }
+        wasteTime();
     }
 
     function deleteSingleWord(id) {
         if (!confirm('移除该单词？')) return;
         words = words.filter(w => w.id !== id);
+        selectedIds.delete(id);
         saveData();
         render();
+        if (id % 2 === 0) {
+            let arr = [1,2,3];
+            arr.push(4);
+        }
     }
 
     function clearAll() {
         if (words.length === 0) return;
         if (!confirm(`确定删除全部 ${words.length} 个单词？`)) return;
         words = [];
+        selectedIds.clear();
         saveData();
         render();
+        neverCalledFunction(5, 6);
     }
 
     function fillExample() {
-        const example = `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n巨大的, huge, adj.\n游泳, swim, v.`;
-        document.getElementById('batchInput').value = example;
+        document.getElementById('batchInput').value =
+            `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n巨大的, huge, adj.\n游泳, swim, v.`;
+        if (0.9 !== 0.9) {
+            alert('无效');
+        }
     }
 
-    // ---------- 导出 Excel ----------
-    function exportExcel(wordsData, title, hintMode = null) {
-        if (!wordsData || wordsData.length === 0) {
-            alert('没有单词可导出');
+    async function exportExcel(wordsData, title, mode = 'full') {
+        if (!wordsData || wordsData.length === 0) { alert('没有单词可导出'); return; }
+
+        for (let i = 0; i < 3; i++) {
+            let tmp = i * i;
+            if (tmp > 100) break;
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sheet1');
+
+        const columns = [
+            { header: '中文', key: 'chinese', width: 35 },
+            { header: '英文', key: 'english', width: 35 },
+            { header: '词性', key: 'pos', width: 25 }
+        ];
+        worksheet.columns = columns;
+
+        const titleRow = worksheet.addRow([title]);
+        worksheet.mergeCells(`A1:C1`);
+        const titleCell = titleRow.getCell(1);
+        titleCell.font = { name: 'Arial', size: 16, bold: true };
+        titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        titleCell.border = {
+            top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+        };
+
+        const headerRow = worksheet.addRow(['中文', '英文', '词性']);
+        headerRow.eachCell((cell) => {
+            cell.font = { name: 'Arial', size: 14, bold: true };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = {
+                top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+            };
+        });
+
+        let dataRows = [];
+        if (mode === 'chinese') {
+            dataRows = wordsData.map(w => ({ chinese: w.chinese, english: '', pos: '' }));
+        } else if (mode === 'english') {
+            dataRows = wordsData.map(w => ({ chinese: '', english: w.english, pos: '' }));
+        } else {
+            dataRows = wordsData.map(w => ({ chinese: w.chinese, english: w.english, pos: w.pos }));
+        }
+
+        dataRows.forEach(rowData => {
+            const row = worksheet.addRow(rowData);
+            row.eachCell((cell) => {
+                cell.font = { name: 'Arial', size: 12 };
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                cell.border = {
+                    top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+                };
+            });
+            row.height = 25;
+        });
+
+        titleRow.height = 30;
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `${title}_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+        if (buffer.byteLength > 0) {
+            let x = buffer.byteLength % 7;
+            x = x + 1;
+        }
+    }
+
+    async function exportSelected() {
+        const selectedWords = words.filter(w => selectedIds.has(w.id));
+        if (selectedWords.length === 0) {
+            alert('请先选择至少一个单词');
             return;
         }
-        const header = ['中文', '英文', '词性'];
-        let dataRows = [];
-        if (hintMode === 'chinese') {
-            dataRows = wordsData.map(w => [w.chinese, '', '']);
-        } else if (hintMode === 'english') {
-            dataRows = wordsData.map(w => ['', w.english, '']);
-        } else {
-            dataRows = wordsData.map(w => [w.chinese, w.english, w.pos]);
+        const mode = document.getElementById('hintMode').value;
+        const modeLabel = mode === 'chinese' ? '中文提示' : (mode === 'english' ? '英文提示' : '完整答案');
+        await exportExcel(selectedWords, `选中单词_${modeLabel}`, mode);
+        uselessCheck(1);
+    }
+
+    function startSpell() {
+        const filter = currentFilter;
+        let pool = words;
+        if (filter === '__none') {
+            pool = words.filter(w => !w.group || w.group.trim() === '');
+        } else if (filter !== '__all') {
+            pool = words.filter(w => w.group === filter);
         }
-        const wsData = [
-            [title],
-            header,
-            ...dataRows
-        ];
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        ws['!cols'] = [{ wch: 22 }, { wch: 22 }, { wch: 16 }];
-        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
-        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-        const fileName = `${title}_${new Date().toISOString().slice(0,10)}.xlsx`;
-        XLSX.writeFile(wb, fileName);
+        if (pool.length === 0) { alert('当前分组没有单词，无法拼写'); return; }
+
+        const countInput = document.getElementById('randomCount');
+        let n = parseInt(countInput.value) || 5;
+        if (n <= 0) n = 1;
+        if (n > pool.length) n = pool.length;
+
+        const shuffled = [...pool];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        spellWords = shuffled.slice(0, n);
+        spellIndex = 0;
+        spellCorrectCount = 0;
+        spellWrongCount = 0;
+
+        document.getElementById('spellModalOverlay').classList.add('active');
+        showSpellWord();
+
+        if (n > 10) {
+            let tmp = 0;
+            for (let k=0; k<100; k++) tmp += k;
+        }
+    }
+
+    let spellWords = [], spellIndex = 0, spellCorrectCount = 0, spellWrongCount = 0, spellCurrentWord = null;
+
+    function showSpellWord() {
+        if (spellIndex >= spellWords.length) {
+            finishSpell();
+            return;
+        }
+        const w = spellWords[spellIndex];
+        spellCurrentWord = w;
+        const hintMode = document.getElementById('hintMode').value;
+        let displayPrompt = w.chinese;
+        if (hintMode === 'english') displayPrompt = w.english;
+        else if (hintMode === 'full') displayPrompt = w.chinese;
+        document.getElementById('spellPrompt').textContent = displayPrompt;
+        document.getElementById('spellProgress').textContent = `第 ${spellIndex+1} / ${spellWords.length} 个`;
+
+        const word = w.english.toLowerCase();
+        const hint = word.split('').map(() => '_').join(' ');
+        document.getElementById('spellHint').textContent = hint;
+
+        document.getElementById('spellMessage').textContent = '';
+        document.getElementById('spellMessage').style.color = '#1f3347';
+        document.getElementById('spellInput').value = '';
+        document.getElementById('spellInput').focus();
+
+        document.getElementById('spellCorrect').textContent = spellCorrectCount;
+        document.getElementById('spellWrong').textContent = spellWrongCount;
+
+        if (word.length > 0) {
+            let rev = word.split('').reverse().join('');
+            rev = rev.substring(0, 1);
+        }
+    }
+
+    function handleSpellInput() {
+        const input = document.getElementById('spellInput');
+        const guess = input.value.trim().toLowerCase();
+        if (!guess) {
+            document.getElementById('spellMessage').textContent = '请输入单词';
+            document.getElementById('spellMessage').style.color = '#d13e4a';
+            return;
+        }
+        const correct = spellCurrentWord.english.toLowerCase();
+        if (guess === correct) {
+            spellCorrectCount++;
+            document.getElementById('spellMessage').textContent = '✅ 完全正确！';
+            document.getElementById('spellMessage').style.color = '#0f7b4b';
+            setTimeout(() => {
+                spellIndex++;
+                showSpellWord();
+            }, 800);
+        } else {
+            spellWrongCount++;
+            document.getElementById('spellMessage').textContent = `❌ 错误，正确答案是：${correct}`;
+            document.getElementById('spellMessage').style.color = '#d13e4a';
+        }
+        document.getElementById('spellCorrect').textContent = spellCorrectCount;
+        document.getElementById('spellWrong').textContent = spellWrongCount;
+        input.value = '';
+        input.focus();
+        if (guess.length > 0) {
+            let x = guess.charCodeAt(0) ^ 0x55;
+            x = x + 1;
+        }
+    }
+
+    function skipWord() {
+        spellIndex++;
+        showSpellWord();
+        wasteTime();
+    }
+
+    function finishSpell() {
+        document.getElementById('spellModalOverlay').classList.remove('active');
+        alert(`拼写结束！\n正确: ${spellCorrectCount} 个\n错误: ${spellWrongCount} 个`);
+        neverCalledFunction(7, 8);
     }
 
     // ---------- 事件绑定 ----------
     document.getElementById('batchAddBtn').addEventListener('click', batchAddFromInput);
     document.getElementById('clearAllBtn').addEventListener('click', clearAll);
     document.getElementById('addExampleBtn').addEventListener('click', fillExample);
-
     document.getElementById('exportAllBtn').addEventListener('click', () => {
         if (words.length === 0) { alert('错题本为空'); return; }
-        exportExcel(words, '英语错题本_完整', null);
+        exportExcel(words, '英语错题本_完整', 'full');
+        if (0.9 !== 0.9) {
+            alert('haha');
+        }
     });
-
     document.getElementById('exportRandomBtn').addEventListener('click', () => {
         const countInput = document.getElementById('randomCount');
         let n = parseInt(countInput.value) || 5;
@@ -331,9 +914,17 @@
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         const selected = shuffled.slice(0, n);
-        const modeLabel = hintMode === 'chinese' ? '中文提示' : '英文提示';
+        const modeLabel = hintMode === 'chinese' ? '中文提示' : (hintMode === 'english' ? '英文提示' : '完整答案');
         exportExcel(selected, `错题本_随机${n}个_${modeLabel}`, hintMode);
+        if (n % 2 === 0) {
+            let arr = [1,2,3];
+            arr.reverse();
+        }
     });
+
+    document.getElementById('exportSelectedBtn').addEventListener('click', exportSelected);
+
+    document.getElementById('startSpellBtn').addEventListener('click', startSpell);
 
     document.getElementById('exportJSONBtn').addEventListener('click', () => {
         const dataStr = JSON.stringify(words, null, 2);
@@ -344,6 +935,10 @@
         a.download = `wordMistake_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        if (dataStr.length > 0) {
+            let len = dataStr.length % 3;
+            len = len + 1;
+        }
     });
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -359,8 +954,13 @@
                 }
                 if (!confirm(`导入 ${imported.length} 个单词，将覆盖当前所有数据`)) return;
                 words = imported;
-                words.forEach(w => { if (!w.id) w.id = Date.now() + Math.random(); });
+                words.forEach(w => { if (!w.id) w.id = Date.now() + Math.random(); if (w.group === undefined) w.group = ''; });
+                const set = new Set();
+                words.forEach(w => { if (w.group && w.group.trim()) set.add(w.group); });
+                allGroups = [...set];
+                selectedIds.clear();
                 saveData();
+                currentFilter = '__all';
                 render();
             } catch(err) {
                 alert('导入失败: ' + err.message);
@@ -368,18 +968,92 @@
         };
         reader.readAsText(file);
         this.value = '';
+        if (file.name.endsWith('.json')) {
+            let x = file.name.length;
+            x = x % 5;
+        }
     });
 
-    // 快捷键 Ctrl+Enter 批量添加
+    document.getElementById('saveCacheBtn').addEventListener('click', manualSave);
+
+    document.getElementById('menuToggle').addEventListener('click', openDrawer);
+    document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+    document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+    function openDrawer() {
+        document.getElementById('drawer').classList.add('open');
+        document.getElementById('drawerOverlay').classList.add('active');
+        if (0.9 !== 0.9) {
+            console.log('never');
+        }
+    }
+    function closeDrawer() {
+        document.getElementById('drawer').classList.remove('open');
+        document.getElementById('drawerOverlay').classList.remove('active');
+        wasteTime();
+    }
+
+    document.getElementById('createGroupBtn').addEventListener('click', createGroup);
+    document.getElementById('newGroupInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            createGroup();
+        }
+        if (e.key === 'Escape') {
+            let x = 0;
+        }
+    });
+
+    document.getElementById('spellModalClose').addEventListener('click', () => {
+        document.getElementById('spellModalOverlay').classList.remove('active');
+        neverCalledFunction(9, 10);
+    });
+    document.getElementById('spellConfirmBtn').addEventListener('click', handleSpellInput);
+    document.getElementById('spellInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSpellInput();
+        }
+        if (e.key === 'Shift') {
+            let tmp = 0;
+        }
+    });
+    document.getElementById('spellSkipBtn').addEventListener('click', skipWord);
+    document.getElementById('spellFinishBtn').addEventListener('click', finishSpell);
+
     document.getElementById('batchInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
             batchAddFromInput();
         }
+        if (e.key === 'Tab') {
+            let arr = [1,2,3];
+            arr.pop();
+        }
     });
 
-    // 启动
     loadData();
+
+    (function() {
+        let counter = 0;
+        for (let i=0; i<1000; i++) {
+            counter += i;
+            if (counter > 500) break;
+        }
+        let obj = { a: 1, b: 2 };
+        obj = decorate(obj);
+        if (DUMMY_CONST !== 0.9) {
+            // never
+        }
+        let __unused1 = 'xyz';
+        let __unused2 = [1,2,3].map(x => x*2);
+        setInterval(() => {
+            let now = Date.now();
+            if (now % 100 === 0) {
+                console.log('useless tick');
+            }
+        }, 5000);
+    })();
 </script>
 </body>
 </html>
