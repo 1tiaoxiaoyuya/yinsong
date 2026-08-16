@@ -2,141 +2,112 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>📘 错题本 · 词性练习</title>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background: #f5f7fa; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
+        /* 样式精简，手机适配保留 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #f5f7fa; padding: 12px 8px; min-height: 100vh; display: flex; justify-content: center; }
         .app { max-width: 820px; width: 100%; margin: 0 auto; }
 
-        .topbar { display: flex; align-items: center; padding: 12px 0 20px 0; gap: 12px; background: transparent; }
-        .menu-btn { font-size: 28px; background: none; border: none; cursor: pointer; padding: 4px 8px; color: #1e293b; transition: 0.2s; }
-        .menu-btn:hover { background: #eef2f6; border-radius: 12px; }
-        .topbar h1 { font-size: 24px; font-weight: 650; color: #0f172a; flex: 1; letter-spacing: -0.5px; }
-        .topbar .badge { background: #e2e8f0; padding: 4px 16px; border-radius: 40px; font-size: 14px; color: #1e293b; font-weight: 500; }
-        .btn { padding: 10px 18px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f4f9; color: #1e293b; display: inline-flex; align-items: center; gap: 6px; justify-content: center; transition: all 0.2s; }
+        .topbar { display: flex; align-items: center; padding: 8px 0 16px 0; gap: 8px; flex-wrap: wrap; }
+        .menu-btn { font-size: 28px; background: none; border: none; cursor: pointer; padding: 4px 8px; color: #1e293b; }
+        .topbar h1 { font-size: 22px; font-weight: 650; color: #0f172a; flex: 1; }
+        .topbar .badge { background: #e2e8f0; padding: 4px 14px; border-radius: 40px; font-size: 13px; color: #1e293b; }
+        .btn { padding: 10px 16px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f4f9; color: #1e293b; display: inline-flex; align-items: center; gap: 6px; justify-content: center; min-height: 44px; }
         .btn:active { transform: scale(0.96); }
-        .btn-primary { background: #1e293b; color: white; box-shadow: 0 4px 12px rgba(30, 41, 59, 0.15); }
-        .btn-primary:hover { background: #0f172a; }
-        .btn-success { background: #0b7b4b; color: white; box-shadow: 0 4px 12px rgba(11, 123, 75, 0.2); }
-        .btn-success:hover { background: #0a6a3f; }
-        .btn-danger { background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2); }
-        .btn-danger:hover { background: #b91c1c; }
-        .btn-warning { background: #d97706; color: white; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2); }
-        .btn-warning:hover { background: #b45309; }
+        .btn-primary { background: #1e293b; color: white; }
+        .btn-success { background: #0b7b4b; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-warning { background: #d97706; color: white; }
         .btn-light { background: #f1f4f9; color: #1e293b; }
-        .btn-light:hover { background: #e2e8f0; }
-        .btn-sm { padding: 6px 14px; font-size: 13px; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; min-height: 34px; }
 
-        .card { background: #ffffff; border-radius: 24px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04); padding: 24px 22px; margin: 0 0 20px 0; border: 1px solid rgba(226, 232, 240, 0.6); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px 12px; }
-        .card-header h3 { font-size: 17px; font-weight: 600; color: #0f172a; }
+        .card { background: #ffffff; border-radius: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); padding: 18px 14px; margin: 0 0 16px 0; border: 1px solid rgba(226,232,240,0.6); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 6px 10px; }
+        .card-header h3 { font-size: 16px; font-weight: 600; color: #0f172a; }
 
-        .form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
-        .form-row label { font-weight: 500; color: #334155; font-size: 14px; min-width: 50px; }
-        .form-row input { padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; background: #fafcff; transition: 0.2s; flex: 1 0 120px; }
-        .form-row input:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59, 124, 255, 0.1); }
+        .form-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .form-row label { font-weight: 500; color: #334155; font-size: 14px; min-width: 44px; }
+        .form-row input { padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; background: #fafcff; flex: 1 0 100px; min-height: 44px; }
+        .form-row input:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59,124,255,0.1); }
         .form-row .btn { flex: 0 1 auto; }
 
-        .batch-textarea textarea { width: 100%; min-height: 90px; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; background: #fafcff; resize: vertical; line-height: 1.6; }
-        .batch-textarea textarea:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59, 124, 255, 0.08); }
-        .template-tip { font-size: 13px; color: #64748b; background: #f1f5f9; padding: 4px 16px; border-radius: 40px; display: inline-block; margin-top: 6px; }
-        .template-tip code { background: #e2e8f0; padding: 2px 10px; border-radius: 30px; font-size: 12px; }
+        .batch-textarea textarea { width: 100%; min-height: 80px; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; background: #fafcff; resize: vertical; line-height: 1.5; }
+        .batch-textarea textarea:focus { border-color: #3b7cff; outline: none; box-shadow: 0 0 0 3px rgba(59,124,255,0.08); }
+        .template-tip { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 4px 14px; border-radius: 40px; display: inline-block; margin-top: 4px; }
 
-        .current-group-indicator { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px 16px; border-radius: 60px; margin-top: 6px; font-size: 14px; color: #334155; }
+        .current-group-indicator { display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 14px; border-radius: 60px; margin-top: 6px; font-size: 13px; color: #334155; flex-wrap: wrap; }
 
-        .table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid #eef2f6; margin-top: 6px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px; }
-        th { text-align: left; padding: 12px 12px; background: #f8fafc; color: #1e293b; font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 10px 12px; border-bottom: 1px solid #edf2f7; vertical-align: middle; background: white; }
-        tr:last-child td { border-bottom: none; }
-        .col-check { width: 40px; text-align: center; }
-        .col-id { color: #94a3b8; font-weight: 450; width: 40px; }
-        .col-actions { width: 100px; text-align: right; white-space: nowrap; }
-        .del-btn, .edit-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 30px; transition: 0.15s; line-height: 1; }
+        .table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid #eef2f6; margin-top: 6px; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+        th { text-align: left; padding: 10px 8px; background: #f8fafc; color: #1e293b; font-weight: 600; font-size: 12px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 8px 8px; border-bottom: 1px solid #edf2f7; vertical-align: middle; background: white; }
+        .col-check { width: 36px; text-align: center; }
+        .col-id { width: 32px; color: #94a3b8; font-size: 12px; }
+        .col-actions { width: 80px; text-align: right; white-space: nowrap; }
+        .del-btn, .edit-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 6px; border-radius: 30px; line-height: 1; }
         .del-btn { color: #94a3b8; }
         .del-btn:hover { color: #dc2626; background: #fef2f2; }
         .edit-btn { color: #3b7cff; }
         .edit-btn:hover { background: #eff6ff; }
-        .group-tag, .pos-tag { background: #f1f5f9; padding: 2px 12px; border-radius: 30px; font-size: 12px; color: #1e293b; display: inline-block; }
+        .group-tag, .pos-tag { background: #f1f5f9; padding: 2px 10px; border-radius: 30px; font-size: 11px; color: #1e293b; display: inline-block; }
         .pos-tag { background: #e0f2fe; color: #0369a1; }
-        .empty-placeholder { text-align: center; color: #94a3b8; padding: 32px 16px; font-size: 15px; }
-        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3b7cff; }
+        .empty-placeholder { text-align: center; color: #94a3b8; padding: 24px 12px; font-size: 14px; }
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: #3b7cff; }
 
-        .toolbar { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
-        .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; background: #f8fafc; padding: 10px 16px; border-radius: 60px; width: 100%; }
-        .toolbar-group label { font-size: 14px; font-weight: 500; color: #334155; }
-        .toolbar-group input[type="number"] { width: 64px; padding: 8px 8px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; background: white; text-align: center; }
-        .toolbar-group select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 40px; background: white; font-size: 14px; }
+        .toolbar { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+        .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; background: #f8fafc; padding: 8px 12px; border-radius: 60px; width: 100%; }
+        .toolbar-group label { font-size: 13px; font-weight: 500; color: #334155; }
+        .toolbar-group input[type="number"] { width: 56px; padding: 6px 6px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; background: white; text-align: center; min-height: 36px; }
+        .toolbar-group select { padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 40px; background: white; font-size: 13px; min-height: 36px; }
 
-        .backup-area { border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .backup-area .btn { padding: 8px 18px; border-radius: 40px; background: #f1f4f9; border: none; font-size: 14px; font-weight: 500; cursor: pointer; flex: 1 0 auto; }
+        .backup-area { border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .backup-area .btn { padding: 6px 14px; border-radius: 40px; background: #f1f4f9; border: none; font-size: 13px; font-weight: 500; cursor: pointer; flex: 1 0 auto; min-height: 38px; }
 
-        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); z-index: 99; display: none; }
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.4); z-index: 99; display: none; }
         .drawer-overlay.active { display: block; }
-        .drawer { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; background: #ffffff; z-index: 100; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 20px rgba(0,0,0,0.08); padding: 24px 20px; overflow-y: auto; }
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #ffffff; z-index: 100; transition: left 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 4px 0 20px rgba(0,0,0,0.08); padding: 20px 16px; overflow-y: auto; }
         .drawer.open { left: 0; }
         .drawer .close-btn { font-size: 28px; background: none; border: none; float: right; cursor: pointer; color: #64748b; }
-        .drawer h3 { font-size: 18px; margin-bottom: 20px; color: #0f172a; }
-        .drawer .group-list { list-style: none; padding: 0; }
-        .drawer .group-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 15px; transition: 0.15s; }
-        .drawer .group-list li:hover { background: #f8fafc; border-radius: 12px; }
-        .drawer .group-list li.active { background: #eff6ff; border-radius: 12px; font-weight: 500; color: #1e40af; }
-        .drawer .group-list li .del-group { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 0 6px; }
-        .drawer .group-list li .del-group:hover { color: #dc2626; }
-        .drawer .group-list li .group-name { flex: 1; }
-        .drawer .group-list li .count-badge { background: #e2e8f0; padding: 0 12px; border-radius: 30px; font-size: 12px; color: #475569; }
-        .drawer-create-group { margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .drawer-create-group input { flex: 1; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; background: white; }
-        .drawer-create-group .btn { flex: 0 1 auto; padding: 8px 16px; }
+        .drawer h3 { font-size: 17px; margin-bottom: 16px; color: #0f172a; }
+        .drawer .group-list li { padding: 10px 6px; font-size: 14px; }
 
-        .spell-modal-overlay, .pos-modal-overlay, .edit-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .spell-modal-overlay, .pos-modal-overlay, .edit-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 12px; }
         .spell-modal-overlay.active, .pos-modal-overlay.active, .edit-modal-overlay.active { display: flex; }
-        .spell-modal, .pos-modal, .edit-modal { background: #ffffff; border-radius: 32px; max-width: 540px; width: 100%; padding: 32px 28px; box-shadow: 0 24px 64px rgba(0,0,0,0.2); position: relative; max-height: 95vh; overflow-y: auto; }
-        .close-modal { position: absolute; right: 16px; top: 16px; font-size: 28px; background: none; border: none; cursor: pointer; color: #94a3b8; transition: 0.2s; }
-        .close-modal:hover { color: #0f172a; }
-        .spell-modal h2, .pos-modal h2, .edit-modal h2 { text-align: center; margin-bottom: 20px; color: #0f172a; font-size: 24px; }
-        .spell-progress, .pos-progress { text-align: center; font-size: 16px; color: #64748b; margin-bottom: 16px; }
-        .spell-prompt, .pos-prompt { text-align: center; font-size: 28px; font-weight: 600; color: #0f172a; margin-bottom: 12px; }
-        .spell-hint { text-align: center; font-size: 20px; letter-spacing: 6px; color: #64748b; margin-bottom: 20px; font-family: monospace; }
-        .spell-input-row { display: flex; gap: 12px; justify-content: center; align-items: center; margin: 16px 0; }
-        .spell-input-row input { flex: 1; padding: 14px 18px; font-size: 20px; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; outline: none; background: #fafcff; }
-        .spell-input-row input:focus { border-color: #3b7cff; box-shadow: 0 0 0 3px rgba(59,124,255,0.1); }
-        .spell-stats, .pos-stats { display: flex; justify-content: center; gap: 40px; font-size: 18px; color: #1e293b; margin: 20px 0; }
-        .spell-stats .correct, .pos-stats .correct { color: #0b7b4b; font-weight: 600; }
-        .spell-stats .wrong, .pos-stats .wrong { color: #dc2626; font-weight: 600; }
-        .spell-actions, .pos-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        .spell-message, .pos-message { text-align: center; font-size: 18px; min-height: 40px; margin-top: 12px; font-weight: 500; }
-
-        .pos-options { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
-        .pos-option { padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 16px; cursor: pointer; font-size: 18px; text-align: center; transition: 0.2s; background: #fafcff; }
-        .pos-option:hover { border-color: #94a3b8; background: #f8fafc; }
-        .pos-option:active { transform: scale(0.97); }
+        .spell-modal, .pos-modal, .edit-modal { background: #ffffff; border-radius: 28px; max-width: 540px; width: 100%; padding: 24px 18px; box-shadow: 0 24px 64px rgba(0,0,0,0.2); position: relative; max-height: 95vh; overflow-y: auto; }
+        .close-modal { position: absolute; right: 12px; top: 12px; font-size: 28px; background: none; border: none; cursor: pointer; color: #94a3b8; }
+        .spell-modal h2, .pos-modal h2, .edit-modal h2 { font-size: 20px; margin-bottom: 16px; }
+        .spell-progress, .pos-progress { font-size: 14px; }
+        .spell-prompt, .pos-prompt { font-size: 24px; }
+        .spell-hint { font-size: 18px; letter-spacing: 4px; }
+        .spell-input-row input { font-size: 18px; padding: 12px 14px; min-height: 50px; }
+        .spell-stats, .pos-stats { font-size: 16px; gap: 24px; }
+        .pos-option { font-size: 16px; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 16px; cursor: pointer; text-align: center; transition: 0.2s; background: #fafcff; }
+        .pos-option.selected { border-color: #3b7cff; background: #eff6ff; }
         .pos-option.correct { border-color: #0b7b4b; background: #ecfdf3; }
         .pos-option.wrong { border-color: #dc2626; background: #fef2f2; }
-
-        .edit-form .form-row { margin-bottom: 14px; }
-        .edit-form label { display: inline-block; width: 80px; font-weight: 500; color: #334155; }
-        .edit-form input, .edit-form select { padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 15px; background: #fafcff; width: calc(100% - 90px); }
+        .pos-option.disabled { cursor: default; opacity: 0.7; }
+        .edit-form label { width: 70px; font-size: 14px; }
+        .edit-form input, .edit-form select { width: calc(100% - 80px); font-size: 14px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 40px; background: #fafcff; }
         .edit-form .btn { margin-top: 12px; width: 100%; }
 
         @media (max-width: 640px) {
-            body { padding: 10px; }
-            .card { padding: 18px 14px; }
-            .form-row label { min-width: 40px; }
-            .form-row input { flex: 1 0 100px; }
-            .topbar h1 { font-size: 20px; }
-            .toolbar-group { border-radius: 30px; padding: 8px 12px; flex-wrap: wrap; }
-            .pos-modal { padding: 24px 16px; }
-            .pos-prompt { font-size: 22px; }
-            .pos-option { font-size: 16px; padding: 14px 16px; }
-            .pos-stats { gap: 20px; font-size: 16px; }
-            .edit-form label { width: 100%; }
+            body { padding: 8px 4px; }
+            .card { padding: 14px 10px; border-radius: 20px; }
+            .form-row label { min-width: 36px; font-size: 13px; }
+            .form-row input { font-size: 13px; padding: 8px 12px; min-height: 38px; }
+            .btn { font-size: 13px; padding: 8px 12px; min-height: 38px; }
+            .toolbar-group { padding: 6px 10px; }
+            table { min-width: 400px; font-size: 12px; }
+            .pos-modal { padding: 18px 14px; }
+            .pos-prompt { font-size: 20px; }
+            .pos-option { font-size: 15px; padding: 12px 14px; }
+            .edit-form label { width: 100%; margin-bottom: 2px; }
             .edit-form input, .edit-form select { width: 100%; }
-            .drawer { width: 280px; left: -280px; }
-            table { min-width: 560px; }
+            .drawer { width: 260px; left: -260px; }
         }
     </style>
 </head>
@@ -146,25 +117,26 @@
         <button class="menu-btn" id="menuToggle">☰</button>
         <h1>📘 错题本</h1>
         <span class="badge" id="wordCountBadge">0</span>
-        <button class="btn btn-success btn-sm" id="saveCacheBtn" style="padding:4px 14px;">💾 缓存</button>
+        <button class="btn btn-success btn-sm" id="saveCacheBtn">💾 缓存</button>
     </div>
 
+    <!-- 侧边栏 -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
     <div class="drawer" id="drawer">
         <button class="close-btn" id="drawerClose">✕</button>
         <h3>📂 分组</h3>
         <ul class="group-list" id="groupList"></ul>
-        <div class="drawer-create-group">
-            <input type="text" id="newGroupInput" placeholder="新分组名称" maxlength="20">
-            <button class="btn btn-primary" id="createGroupBtn">创建</button>
+        <div class="drawer-create-group" style="display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;">
+            <input type="text" id="newGroupInput" placeholder="新分组名称" maxlength="20" style="flex:1; padding:8px 12px; border:1px solid #e2e8f0; border-radius:40px; font-size:14px;">
+            <button class="btn btn-primary" id="createGroupBtn" style="flex:0 1 auto;">创建</button>
         </div>
-        <div style="margin-top: 16px;">
+        <div style="margin-top:16px;">
             <button class="btn btn-danger btn-sm" id="deleteSelectedGroupBtn" style="width:100%;">删除当前分组</button>
-            <div style="font-size:12px; color:#94a3b8; margin-top:8px;">点击分组筛选 · 删除仅移出分组</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:6px;">点击分组筛选 · 删除仅移出分组</div>
         </div>
     </div>
 
-    <!-- 单个添加卡片（只有中文、英文、词性缩写） -->
+    <!-- 单个添加卡片（已移除词性分组字段） -->
     <div class="card">
         <div class="card-header"><h3>✏️ 单个添加</h3></div>
         <div class="form-row">
@@ -180,7 +152,7 @@
         </div>
         <div class="current-group-indicator">
             📁 添加至：<strong id="singleGroupLabel">未分组</strong>
-            <span style="font-size:13px; color:#64748b; margin-left:8px;">（侧边栏选择分组）</span>
+            <span style="font-size:12px; color:#64748b;">（侧边栏选择分组）</span>
         </div>
     </div>
 
@@ -192,7 +164,7 @@
                 <textarea id="batchInput" placeholder="每行一个：中文, 英文, 词性缩写（多个用逗号或斜杠）&#10;例如：&#10;苹果, apple, n.&#10;跑, run, v.&#10;意思, mean, n./v."></textarea>
                 <div class="template-tip">⚡ 每行一条 · 用 <code>,</code> 或 <code>Tab</code> 分隔 · 词性缩写可选</div>
             </div>
-            <div class="batch-actions" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+            <div class="batch-actions" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;">
                 <button class="btn btn-primary" id="batchAddBtn">➕ 批量添加</button>
                 <button class="btn btn-light" id="clearAllBtn">🗑️ 清空</button>
                 <button class="btn btn-light" id="addExampleBtn">📋 示例</button>
@@ -200,11 +172,11 @@
         </div>
     </div>
 
-    <!-- 单词列表卡片 -->
+    <!-- 单词列表卡片（已移除词性分组列） -->
     <div class="card">
         <div class="card-header">
             <h3>📋 单词列表</h3>
-            <span style="font-size:13px; color:#64748b;">点击 ✕ 删除 · ✎ 修改</span>
+            <span style="font-size:12px; color:#64748b;">点击 ✕ 删除 · ✎ 修改</span>
         </div>
         <div class="table-wrap">
             <table>
@@ -222,35 +194,35 @@
                 <tbody id="wordTableBody"></tbody>
             </table>
         </div>
-        <div style="margin-top:16px;">
+        <div style="margin-top:12px;">
             <div class="toolbar">
                 <div class="toolbar-group" style="justify-content:space-between;">
-                    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-                        <button class="btn btn-success" id="exportSelectedBtn">📤 导出选中</button>
-                        <span class="selected-count" id="selectedCount" style="font-size:13px; color:#64748b;">已选 0 个</span>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                        <button class="btn btn-success btn-sm" id="exportSelectedBtn">📤 导出选中</button>
+                        <span class="selected-count" id="selectedCount" style="font-size:12px; color:#64748b;">已选 0 个</span>
                     </div>
-                    <button class="btn btn-light" id="clearSelectionBtn">取消选择</button>
+                    <button class="btn btn-light btn-sm" id="clearSelectionBtn">取消选择</button>
                 </div>
                 <div class="toolbar-group">
                     <label>📤 导出</label>
-                    <button class="btn btn-success" id="exportAllBtn">完整表格</button>
+                    <button class="btn btn-success btn-sm" id="exportAllBtn">完整表格</button>
                 </div>
                 <div class="toolbar-group">
                     <label>🎲 随机抽</label>
                     <input type="number" id="randomCount" value="5" min="1" max="200">
-                    <span style="color:#475569;">个</span>
+                    <span style="color:#475569; font-size:13px;">个</span>
                     <select id="hintMode">
                         <option value="chinese">中文提示</option>
                         <option value="english">英文提示</option>
                         <option value="full">完整答案</option>
                     </select>
-                    <button class="btn btn-primary" id="exportRandomBtn">生成考试表</button>
-                    <button class="btn btn-warning" id="startSpellBtn">✏️ 拼写</button>
-                    <button class="btn btn-primary" id="startPosBtn">📚 词性选择</button>
+                    <button class="btn btn-primary btn-sm" id="exportRandomBtn">生成考试表</button>
+                    <button class="btn btn-warning btn-sm" id="startSpellBtn">✏️ 拼写</button>
+                    <button class="btn btn-primary btn-sm" id="startPosBtn">📚 词性选择</button>
                 </div>
-                <div style="display:flex; flex-wrap:wrap; gap:8px; width:100%;">
-                    <button class="btn btn-light" id="exportJSONBtn" style="flex:1;">💾 备份 JSON</button>
-                    <label class="btn btn-light" style="flex:1; cursor:pointer; display:inline-flex; gap:6px; align-items:center; justify-content:center;">
+                <div style="display:flex; flex-wrap:wrap; gap:6px; width:100%;">
+                    <button class="btn btn-light btn-sm" id="exportJSONBtn" style="flex:1;">💾 备份 JSON</button>
+                    <label class="btn btn-light btn-sm" style="flex:1; cursor:pointer; display:inline-flex; gap:6px; align-items:center; justify-content:center;">
                         📂 导入备份
                         <input type="file" id="fileInput" accept=".json" style="display:none;">
                     </label>
@@ -258,7 +230,7 @@
             </div>
         </div>
         <div class="backup-area">
-            <span style="font-size:13px; color:#64748b;">💾 自动保存 · 点击顶栏「缓存」手动保存</span>
+            <span style="font-size:12px; color:#64748b;">💾 自动保存 · 点击顶栏「缓存」手动保存</span>
         </div>
     </div>
 
@@ -286,13 +258,14 @@
         </div>
     </div>
 
-    <!-- 词性选择题模态框 -->
+    <!-- 词性选择题模态框（英文考中文，多选） -->
     <div class="pos-modal-overlay" id="posModalOverlay">
         <div class="pos-modal">
             <button class="close-modal" id="posModalClose">✕</button>
-            <h2>📚 词性选择题</h2>
+            <h2>📚 词性选择题（多选）</h2>
             <div class="pos-progress" id="posProgress">第 1 / 5 题</div>
-            <div class="pos-prompt" id="posPrompt">单词：苹果</div>
+            <div class="pos-prompt" id="posPrompt">单词：apple</div>
+            <div style="font-size:14px; color:#64748b; text-align:center; margin-bottom:8px;">请选择所有正确词性</div>
             <div class="pos-options" id="posOptions"></div>
             <div class="pos-stats">
                 <span>✅ 正确: <span class="correct" id="posCorrect">0</span></span>
@@ -300,6 +273,7 @@
             </div>
             <div class="pos-message" id="posMessage"></div>
             <div class="pos-actions">
+                <button class="btn btn-primary" id="posSubmitBtn">提交答案</button>
                 <button class="btn btn-light" id="posSkipBtn">⏭️ 跳过</button>
                 <button class="btn btn-success" id="posFinishBtn">🏁 完成</button>
             </div>
@@ -417,7 +391,6 @@
     let currentFilter = '__all';
     let selectedIds = new Set();
 
-    // 英文缩写到中文的映射
     const POS_ABBR_MAP = {
         'n': '名词', 'n.': '名词',
         'v': '动词', 'v.': '动词',
@@ -432,7 +405,6 @@
     };
     const ALL_POS = ['名词', '动词', '形容词', '副词', '介词', '连词', '代词', '数词', '冠词', '感叹词'];
 
-    // 从词性缩写解析出中文列表
     function parsePosAbbr(abbr) {
         if (!abbr) return [];
         const parts = abbr.split(/[,，、\/\s]+/).map(s => s.trim()).filter(Boolean);
@@ -448,28 +420,19 @@
         return [...new Set(result)];
     }
 
-    // 获取单词的词性中文列表（用于考试和显示）
     function getPosCategoryList(word) {
         if (!word) return [];
-        // 优先使用 posCategory（可能已经存储了中文列表，但旧数据可能没有）
         if (word.posCategory && typeof word.posCategory === 'string') {
             const parts = word.posCategory.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
             const result = parts.filter(p => ALL_POS.includes(p));
             if (result.length > 0) return result;
         }
-        // 从 pos 字段解析
         if (word.pos) {
             return parsePosAbbr(word.pos);
         }
         return [];
     }
 
-    // 将中文列表转为逗号分隔字符串（用于存储）
-    function joinPosList(list) {
-        return list.join(',');
-    }
-
-    // 加载数据时自动补全 posCategory
     function loadData() {
         uselessCheck(0);
         wasteTime();
@@ -483,7 +446,6 @@
         words.forEach(w => {
             if (!w.id) w.id = Date.now() + Math.random();
             if (w.group === undefined) w.group = '';
-            // 如果 posCategory 为空，但 pos 有内容，自动解析
             if (!w.posCategory && w.pos) {
                 const list = parsePosAbbr(w.pos);
                 if (list.length > 0) {
@@ -492,7 +454,6 @@
                     w.posCategory = '';
                 }
             }
-            // 如果 posCategory 有值但可能不是标准中文，尝试转换
             if (w.posCategory) {
                 const parts = w.posCategory.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
                 const mapped = parts.map(p => {
@@ -794,6 +755,14 @@
         dummy = dummy + 1;
     }
 
+    document.getElementById('createGroupBtn').addEventListener('click', createGroup);
+    document.getElementById('newGroupInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            createGroup();
+        }
+    });
+
     // ---------- 单个添加 ----------
     function singleAdd() {
         const chinese = document.getElementById('singleChinese').value.trim();
@@ -815,7 +784,6 @@
         let targetGroup = currentFilter;
         if (targetGroup === '__none') targetGroup = '';
 
-        // 解析词性，生成 posCategory
         const posList = parsePosAbbr(pos);
         const posCategory = posList.join(',');
 
@@ -902,8 +870,21 @@
     }
 
     document.getElementById('batchAddBtn').addEventListener('click', batchAddFromInput);
+    document.getElementById('clearAllBtn').addEventListener('click', function() {
+        if (words.length === 0) return;
+        if (!confirm(`确定删除全部 ${words.length} 个单词？`)) return;
+        words = [];
+        selectedIds.clear();
+        saveData();
+        render();
+        neverCalledFunction(5, 6);
+    });
+    document.getElementById('addExampleBtn').addEventListener('click', function() {
+        document.getElementById('batchInput').value =
+            `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n游泳, swim, v.\n意思, mean, n./v.`;
+    });
 
-    // ---------- 其他操作 ----------
+    // ---------- 删除单个 ----------
     function deleteSingleWord(id) {
         if (!confirm('移除该单词？')) return;
         words = words.filter(w => w.id !== id);
@@ -915,24 +896,6 @@
             arr.push(4);
         }
     }
-
-    function clearAll() {
-        if (words.length === 0) return;
-        if (!confirm(`确定删除全部 ${words.length} 个单词？`)) return;
-        words = [];
-        selectedIds.clear();
-        saveData();
-        render();
-        neverCalledFunction(5, 6);
-    }
-
-    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
-
-    function fillExample() {
-        document.getElementById('batchInput').value =
-            `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n游泳, swim, v.\n意思, mean, n./v.`;
-    }
-    document.getElementById('addExampleBtn').addEventListener('click', fillExample);
 
     // ---------- 导出 ----------
     async function exportExcel(wordsData, title, mode = 'full') {
@@ -1179,7 +1142,11 @@
     document.getElementById('spellSkipBtn').addEventListener('click', skipSpell);
     document.getElementById('spellFinishBtn').addEventListener('click', finishSpell);
 
-    // ---------- 词性选择题（使用中文分类，从 pos 解析） ----------
+    // ---------- 词性选择题（英文考中文，多选） ----------
+    let posWords = [], posIndex = 0, posCorrectCount = 0, posWrongCount = 0, posCurrentWord = null;
+    let posAnswered = false;
+    let posSelected = new Set();
+
     function startPosQuiz() {
         const filter = currentFilter;
         let pool = words;
@@ -1213,9 +1180,6 @@
         showPosQuestion();
     }
 
-    let posWords = [], posIndex = 0, posCorrectCount = 0, posWrongCount = 0, posCurrentWord = null;
-    let posAnswered = false;
-
     function showPosQuestion() {
         if (posIndex >= posWords.length) {
             finishPos();
@@ -1224,97 +1188,114 @@
         const w = posWords[posIndex];
         posCurrentWord = w;
         posAnswered = false;
+        posSelected = new Set();
 
-        let prompt = w.chinese || w.english;
-        document.getElementById('posPrompt').textContent = `单词：${prompt}`;
+        // 显示英文，考中文词性
+        document.getElementById('posPrompt').textContent = `单词：${w.english}`;
         document.getElementById('posProgress').textContent = `第 ${posIndex+1} / ${posWords.length} 题`;
 
-        const posList = getPosCategoryList(w);
-        const correct = posList[Math.floor(Math.random() * posList.length)];
-
-        const allPos = ['名词', '动词', '形容词', '副词', '介词', '连词', '代词', '数词', '冠词', '感叹词'];
-        let options = [correct];
-        let distractors = allPos.filter(p => p !== correct);
-        for (let i = distractors.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [distractors[i], distractors[j]] = [distractors[j], distractors[i]];
-        }
-        let selectedDistractors = distractors.slice(0, 3);
-        while (selectedDistractors.length < 3) {
-            const extra = allPos.filter(p => p !== correct && !selectedDistractors.includes(p));
-            if (extra.length === 0) break;
-            selectedDistractors.push(extra[0]);
-        }
-        options = [correct, ...selectedDistractors];
-        for (let i = options.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [options[i], options[j]] = [options[j], options[i]];
-        }
-
+        // 显示所有词性选项（中文）
         const container = document.getElementById('posOptions');
         container.innerHTML = '';
-        options.forEach(opt => {
+        // 打乱顺序显示
+        const shuffled = [...ALL_POS];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        shuffled.forEach(opt => {
             const div = document.createElement('div');
             div.className = 'pos-option';
             div.textContent = opt;
             div.dataset.value = opt;
             div.addEventListener('click', function() {
                 if (posAnswered) return;
-                posAnswered = true;
-                const selected = this.dataset.value;
-                const isCorrect = (selected === correct);
-                container.querySelectorAll('.pos-option').forEach(el => {
-                    if (el.dataset.value === correct) {
-                        el.classList.add('correct');
-                    } else if (el === this && !isCorrect) {
-                        el.classList.add('wrong');
-                    }
-                    el.style.cursor = 'default';
-                });
-                if (isCorrect) {
-                    posCorrectCount++;
-                    document.getElementById('posMessage').textContent = '✅ 正确！';
-                    document.getElementById('posMessage').style.color = '#0b7b4b';
+                const val = this.dataset.value;
+                if (posSelected.has(val)) {
+                    posSelected.delete(val);
+                    this.classList.remove('selected');
                 } else {
-                    posWrongCount++;
-                    document.getElementById('posMessage').textContent = `❌ 错误，正确答案是：${correct}`;
-                    document.getElementById('posMessage').style.color = '#dc2626';
+                    posSelected.add(val);
+                    this.classList.add('selected');
                 }
-                document.getElementById('posCorrect').textContent = posCorrectCount;
-                document.getElementById('posWrong').textContent = posWrongCount;
-                setTimeout(() => {
-                    posIndex++;
-                    showPosQuestion();
-                }, 1500);
             });
             container.appendChild(div);
         });
 
         document.getElementById('posMessage').textContent = '';
+        document.getElementById('posMessage').style.color = '#1e293b';
         document.getElementById('posCorrect').textContent = posCorrectCount;
         document.getElementById('posWrong').textContent = posWrongCount;
+        document.getElementById('posSubmitBtn').style.display = 'inline-flex';
+    }
+
+    function submitPosAnswer() {
+        if (posAnswered) return;
+        if (posSelected.size === 0) {
+            document.getElementById('posMessage').textContent = '请至少选择一个选项';
+            document.getElementById('posMessage').style.color = '#d97706';
+            return;
+        }
+        posAnswered = true;
+
+        const correctList = getPosCategoryList(posCurrentWord);
+        const selectedList = [...posSelected];
+        // 判断是否完全正确（选的全对，且没漏选）
+        const isCorrect = (selectedList.length === correctList.length) &&
+                          selectedList.every(s => correctList.includes(s));
+
+        const container = document.getElementById('posOptions');
+        container.querySelectorAll('.pos-option').forEach(el => {
+            el.style.cursor = 'default';
+            if (correctList.includes(el.dataset.value)) {
+                el.classList.add('correct');
+            } else if (posSelected.has(el.dataset.value) && !correctList.includes(el.dataset.value)) {
+                el.classList.add('wrong');
+            }
+            el.classList.remove('selected');
+        });
+
+        if (isCorrect) {
+            posCorrectCount++;
+            document.getElementById('posMessage').textContent = '✅ 完全正确！';
+            document.getElementById('posMessage').style.color = '#0b7b4b';
+        } else {
+            posWrongCount++;
+            const correctStr = correctList.join('、');
+            document.getElementById('posMessage').textContent = `❌ 正确答案：${correctStr}`;
+            document.getElementById('posMessage').style.color = '#dc2626';
+        }
+        document.getElementById('posCorrect').textContent = posCorrectCount;
+        document.getElementById('posWrong').textContent = posWrongCount;
+        document.getElementById('posSubmitBtn').style.display = 'none';
+
+        setTimeout(() => {
+            posIndex++;
+            showPosQuestion();
+        }, 1800);
     }
 
     function skipPos() {
         if (posAnswered) return;
         posAnswered = true;
-        const posList = getPosCategoryList(posCurrentWord);
-        const correct = posList[Math.floor(Math.random() * posList.length)];
+        const correctList = getPosCategoryList(posCurrentWord);
         const container = document.getElementById('posOptions');
         container.querySelectorAll('.pos-option').forEach(el => {
-            if (el.dataset.value === correct) {
+            if (correctList.includes(el.dataset.value)) {
                 el.classList.add('correct');
             }
             el.style.cursor = 'default';
+            el.classList.remove('selected');
         });
-        document.getElementById('posMessage').textContent = `⏭️ 已跳过，正确答案：${correct}`;
+        document.getElementById('posMessage').textContent = `⏭️ 已跳过，正确答案：${correctList.join('、')}`;
         document.getElementById('posMessage').style.color = '#d97706';
         posWrongCount++;
         document.getElementById('posWrong').textContent = posWrongCount;
+        document.getElementById('posSubmitBtn').style.display = 'none';
         setTimeout(() => {
             posIndex++;
             showPosQuestion();
-        }, 1200);
+        }, 1500);
     }
 
     function finishPos() {
@@ -1327,10 +1308,11 @@
     document.getElementById('posModalClose').addEventListener('click', () => {
         document.getElementById('posModalOverlay').classList.remove('active');
     });
+    document.getElementById('posSubmitBtn').addEventListener('click', submitPosAnswer);
     document.getElementById('posSkipBtn').addEventListener('click', skipPos);
     document.getElementById('posFinishBtn').addEventListener('click', finishPos);
 
-    // ---------- 修改功能 ----------
+    // ---------- 修改功能（保存后自动关闭） ----------
     let editId = null;
 
     function openEditModal(id) {
@@ -1372,7 +1354,6 @@
             return;
         }
 
-        // 重新解析词性
         const posList = parsePosAbbr(pos);
         const posCategory = posList.join(',');
 
@@ -1392,6 +1373,7 @@
 
         saveData();
         render();
+        // ★ 保存后自动关闭
         closeEditModal();
     }
 
@@ -1446,7 +1428,6 @@
                 words.forEach(w => {
                     if (!w.id) w.id = Date.now() + Math.random();
                     if (w.group === undefined) w.group = '';
-                    // 自动补全 posCategory
                     if (!w.posCategory && w.pos) {
                         const list = parsePosAbbr(w.pos);
                         if (list.length > 0) {
@@ -1478,6 +1459,7 @@
 
     document.getElementById('saveCacheBtn').addEventListener('click', manualSave);
 
+    // ---------- 侧边栏控制 ----------
     document.getElementById('menuToggle').addEventListener('click', openDrawer);
     document.getElementById('drawerClose').addEventListener('click', closeDrawer);
     document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
@@ -1494,17 +1476,6 @@
         document.getElementById('drawerOverlay').classList.remove('active');
         wasteTime();
     }
-
-    document.getElementById('createGroupBtn').addEventListener('click', createGroup);
-    document.getElementById('newGroupInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            createGroup();
-        }
-        if (e.key === 'Escape') {
-            let x = 0;
-        }
-    });
 
     document.getElementById('batchInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
