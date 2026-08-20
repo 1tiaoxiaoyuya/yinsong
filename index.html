@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
-        /* 样式精简，手机适配保留 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
         body { background: #f5f7fa; padding: 12px 8px; min-height: 100vh; display: flex; justify-content: center; }
         .app { max-width: 820px; width: 100%; margin: 0 auto; }
@@ -16,7 +15,7 @@
         .menu-btn { font-size: 28px; background: none; border: none; cursor: pointer; padding: 4px 8px; color: #1e293b; }
         .topbar h1 { font-size: 22px; font-weight: 650; color: #0f172a; flex: 1; }
         .topbar .badge { background: #e2e8f0; padding: 4px 14px; border-radius: 40px; font-size: 13px; color: #1e293b; }
-        .btn { padding: 10px 16px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f4f9; color: #1e293b; display: inline-flex; align-items: center; gap: 6px; justify-content: center; min-height: 44px; }
+        .btn { padding: 10px 16px; border-radius: 60px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; background: #f1f4f9; color: #1e293b; display: inline-flex; align-items: center; gap: 6px; justify-content: center; min-height: 44px; user-select: none; }
         .btn:active { transform: scale(0.96); }
         .btn-primary { background: #1e293b; color: white; }
         .btn-success { background: #0b7b4b; color: white; }
@@ -42,18 +41,18 @@
         .current-group-indicator { display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 14px; border-radius: 60px; margin-top: 6px; font-size: 13px; color: #334155; flex-wrap: wrap; }
 
         .table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid #eef2f6; margin-top: 6px; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
-        th { text-align: left; padding: 10px 8px; background: #f8fafc; color: #1e293b; font-weight: 600; font-size: 12px; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 8px 8px; border-bottom: 1px solid #edf2f7; vertical-align: middle; background: white; }
-        .col-check { width: 36px; text-align: center; }
-        .col-id { width: 32px; color: #94a3b8; font-size: 12px; }
-        .col-actions { width: 80px; text-align: right; white-space: nowrap; }
-        .del-btn, .edit-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 6px; border-radius: 30px; line-height: 1; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 440px; }
+        th { text-align: left; padding: 10px 6px; background: #f8fafc; color: #1e293b; font-weight: 600; font-size: 12px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 8px 6px; border-bottom: 1px solid #edf2f7; vertical-align: middle; background: white; }
+        .col-check { width: 32px; text-align: center; }
+        .col-id { width: 28px; color: #94a3b8; font-size: 12px; }
+        .col-actions { width: 72px; text-align: right; white-space: nowrap; }
+        .del-btn, .edit-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 2px 4px; border-radius: 30px; line-height: 1; }
         .del-btn { color: #94a3b8; }
         .del-btn:hover { color: #dc2626; background: #fef2f2; }
         .edit-btn { color: #3b7cff; }
         .edit-btn:hover { background: #eff6ff; }
-        .group-tag, .pos-tag { background: #f1f5f9; padding: 2px 10px; border-radius: 30px; font-size: 11px; color: #1e293b; display: inline-block; }
+        .group-tag, .pos-tag { background: #f1f5f9; padding: 2px 8px; border-radius: 30px; font-size: 11px; color: #1e293b; display: inline-block; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
         .pos-tag { background: #e0f2fe; color: #0369a1; }
         .empty-placeholder { text-align: center; color: #94a3b8; padding: 24px 12px; font-size: 14px; }
         input[type="checkbox"] { width: 18px; height: 18px; accent-color: #3b7cff; }
@@ -73,7 +72,17 @@
         .drawer.open { left: 0; }
         .drawer .close-btn { font-size: 28px; background: none; border: none; float: right; cursor: pointer; color: #64748b; }
         .drawer h3 { font-size: 17px; margin-bottom: 16px; color: #0f172a; }
-        .drawer .group-list li { padding: 10px 6px; font-size: 14px; }
+        .drawer .group-list { list-style: none; padding: 0; }
+        .drawer .group-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 6px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 14px; transition: 0.15s; }
+        .drawer .group-list li:hover { background: #f8fafc; border-radius: 12px; }
+        .drawer .group-list li.active { background: #eff6ff; border-radius: 12px; font-weight: 500; color: #1e40af; }
+        .drawer .group-list li .del-group { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 0 6px; }
+        .drawer .group-list li .del-group:hover { color: #dc2626; }
+        .drawer .group-list li .group-name { flex: 1; }
+        .drawer .group-list li .count-badge { background: #e2e8f0; padding: 0 10px; border-radius: 30px; font-size: 12px; color: #475569; }
+        .drawer-create-group { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .drawer-create-group input { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; min-height: 38px; }
+        .drawer-create-group .btn { flex: 0 1 auto; }
 
         .spell-modal-overlay, .pos-modal-overlay, .edit-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 12px; }
         .spell-modal-overlay.active, .pos-modal-overlay.active, .edit-modal-overlay.active { display: flex; }
@@ -91,7 +100,7 @@
         .pos-option.wrong { border-color: #dc2626; background: #fef2f2; }
         .pos-option.disabled { cursor: default; opacity: 0.7; }
         .edit-form label { width: 70px; font-size: 14px; }
-        .edit-form input, .edit-form select { width: calc(100% - 80px); font-size: 14px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 40px; background: #fafcff; }
+        .edit-form input, .edit-form select { width: calc(100% - 80px); font-size: 14px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 40px; background: #fafcff; min-height: 38px; }
         .edit-form .btn { margin-top: 12px; width: 100%; }
 
         @media (max-width: 640px) {
@@ -101,13 +110,21 @@
             .form-row input { font-size: 13px; padding: 8px 12px; min-height: 38px; }
             .btn { font-size: 13px; padding: 8px 12px; min-height: 38px; }
             .toolbar-group { padding: 6px 10px; }
-            table { min-width: 400px; font-size: 12px; }
+            table { min-width: 360px; font-size: 12px; }
+            th, td { padding: 6px 4px; }
+            .pos-tag, .group-tag { max-width: 60px; font-size: 10px; }
+            .col-actions { width: 60px; }
             .pos-modal { padding: 18px 14px; }
             .pos-prompt { font-size: 20px; }
             .pos-option { font-size: 15px; padding: 12px 14px; }
             .edit-form label { width: 100%; margin-bottom: 2px; }
             .edit-form input, .edit-form select { width: 100%; }
             .drawer { width: 260px; left: -260px; }
+        }
+        @media (max-width: 400px) {
+            table { min-width: 320px; font-size: 11px; }
+            .topbar h1 { font-size: 18px; }
+            .pos-tag, .group-tag { max-width: 50px; }
         }
     </style>
 </head>
@@ -126,9 +143,9 @@
         <button class="close-btn" id="drawerClose">✕</button>
         <h3>📂 分组</h3>
         <ul class="group-list" id="groupList"></ul>
-        <div class="drawer-create-group" style="display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;">
-            <input type="text" id="newGroupInput" placeholder="新分组名称" maxlength="20" style="flex:1; padding:8px 12px; border:1px solid #e2e8f0; border-radius:40px; font-size:14px;">
-            <button class="btn btn-primary" id="createGroupBtn" style="flex:0 1 auto;">创建</button>
+        <div class="drawer-create-group">
+            <input type="text" id="newGroupInput" placeholder="新分组名称" maxlength="20">
+            <button class="btn btn-primary" id="createGroupBtn">创建</button>
         </div>
         <div style="margin-top:16px;">
             <button class="btn btn-danger btn-sm" id="deleteSelectedGroupBtn" style="width:100%;">删除当前分组</button>
@@ -136,7 +153,7 @@
         </div>
     </div>
 
-    <!-- 单个添加卡片（已移除词性分组字段） -->
+    <!-- 单个添加卡片 -->
     <div class="card">
         <div class="card-header"><h3>✏️ 单个添加</h3></div>
         <div class="form-row">
@@ -172,7 +189,7 @@
         </div>
     </div>
 
-    <!-- 单词列表卡片（已移除词性分组列） -->
+    <!-- 单词列表卡片 -->
     <div class="card">
         <div class="card-header">
             <h3>📋 单词列表</h3>
@@ -258,7 +275,7 @@
         </div>
     </div>
 
-    <!-- 词性选择题模态框（英文考中文，多选） -->
+    <!-- 词性选择题模态框 -->
     <div class="pos-modal-overlay" id="posModalOverlay">
         <div class="pos-modal">
             <button class="close-modal" id="posModalClose">✕</button>
@@ -523,13 +540,15 @@
             tbody.innerHTML = filtered.map((w, idx) => {
                 const checked = selectedIds.has(w.id) ? 'checked' : '';
                 const posDisplay = w.pos || '无';
+                // 截断显示过长词性
+                const shortPos = posDisplay.length > 20 ? posDisplay.substring(0, 18) + '…' : posDisplay;
                 return `
                 <tr class="word-row">
                     <td class="col-check"><input type="checkbox" class="row-checkbox" data-id="${w.id}" ${checked}></td>
                     <td class="col-id">${idx+1}</td>
                     <td>${escapeHtml(w.chinese)}</td>
                     <td>${escapeHtml(w.english)}</td>
-                    <td><span class="pos-tag">${escapeHtml(posDisplay)}</span></td>
+                    <td><span class="pos-tag" title="${escapeHtml(posDisplay)}">${escapeHtml(shortPos)}</span></td>
                     <td><span class="group-tag">${escapeHtml(w.group) || '未分组'}</span></td>
                     <td class="col-actions">
                         <button class="edit-btn" data-id="${w.id}" title="修改">✎</button>
@@ -661,8 +680,10 @@
             return;
         }
 
+        // 全部
         const allActive = currentFilter === '__all' ? 'active' : '';
         html += `<li class="${allActive}" data-group="__all"><span class="group-name">📋 全部</span><span class="count-badge">${words.length}</span></li>`;
+        // 未分组
         const noneActive = currentFilter === '__none' ? 'active' : '';
         const noneCount = groupCount['__none'] || 0;
         html += `<li class="${noneActive}" data-group="__none"><span class="group-name">📂 未分组</span><span class="count-badge">${noneCount}</span></li>`;
@@ -678,17 +699,13 @@
             </li>`;
         });
         ul.innerHTML = html;
-        if (ul.children.length > 0) {
-            let last = ul.lastElementChild;
-            if (last) {
-                let dummy = last.textContent;
-            }
-        }
     }
 
+    // 使用事件委托监听侧边栏点击
     document.getElementById('groupList').addEventListener('click', function(e) {
         const target = e.target.closest('li[data-group]');
         if (!target) return;
+        // 如果点击的是删除按钮
         if (e.target.classList.contains('del-group')) {
             const group = target.dataset.group;
             if (group === '__all' || group === '__none') return;
@@ -701,15 +718,13 @@
             render();
             return;
         }
+        // 否则切换分组
         const group = target.dataset.group;
         if (group === currentFilter) return;
         currentFilter = group;
         selectedIds.clear();
         render();
         closeDrawer();
-        if (group.startsWith('__')) {
-            let x = 0;
-        }
     });
 
     document.getElementById('deleteSelectedGroupBtn').addEventListener('click', function() {
@@ -730,10 +745,6 @@
         selectedIds.clear();
         render();
         closeDrawer();
-        if (group.length > 0) {
-            let rev = group.split('').reverse().join('');
-            rev = rev.substring(0, 1);
-        }
     });
 
     function createGroup() {
@@ -1190,14 +1201,11 @@
         posAnswered = false;
         posSelected = new Set();
 
-        // 显示英文，考中文词性
         document.getElementById('posPrompt').textContent = `单词：${w.english}`;
         document.getElementById('posProgress').textContent = `第 ${posIndex+1} / ${posWords.length} 题`;
 
-        // 显示所有词性选项（中文）
         const container = document.getElementById('posOptions');
         container.innerHTML = '';
-        // 打乱顺序显示
         const shuffled = [...ALL_POS];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -1240,7 +1248,6 @@
 
         const correctList = getPosCategoryList(posCurrentWord);
         const selectedList = [...posSelected];
-        // 判断是否完全正确（选的全对，且没漏选）
         const isCorrect = (selectedList.length === correctList.length) &&
                           selectedList.every(s => correctList.includes(s));
 
@@ -1312,7 +1319,7 @@
     document.getElementById('posSkipBtn').addEventListener('click', skipPos);
     document.getElementById('posFinishBtn').addEventListener('click', finishPos);
 
-    // ---------- 修改功能（保存后自动关闭） ----------
+    // ---------- 修改功能 ----------
     let editId = null;
 
     function openEditModal(id) {
@@ -1373,7 +1380,6 @@
 
         saveData();
         render();
-        // ★ 保存后自动关闭
         closeEditModal();
     }
 
