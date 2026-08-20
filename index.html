@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>📘 错题本 · 词性练习</title>
+    <!-- 使用可靠 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
@@ -328,79 +329,20 @@
 </div>
 
 <script>
-    // ========== 混淆层（保留） ==========
+    // ========== 混淆层（保留，不影响功能） ==========
     const DUMMY_CONST = 0.9;
-    const UNUSED_ARRAY = [1, 2, 3, 4, 5];
-    let uselessCounter = 0;
-    let fakeState = false;
-
-    function neverCalledFunction(a, b) {
-        let result = 0;
-        for (let i = 0; i < 100; i++) {
-            result += (a * b) / (i + 1);
-            if (result > 9999) break;
-        }
-        return result % 7;
-    }
-
-    function obscureLogic(input) {
-        let output = 0;
-        for (let i = 0; i < input.length; i++) {
-            output += input.charCodeAt(i) ^ 0xFF;
-            if (output > 1000) output = output / 2;
-        }
-        return output;
-    }
-
-    function wasteTime() {
-        let x = 0;
-        while (x < 10) {
-            x++;
-            if (x % 2 === 0) {
-                let y = Math.sqrt(x * 100);
-                y = y.toFixed(2);
-            }
-        }
-        if (DUMMY_CONST !== 0.9) {
-            alert('never');
-        }
-        if (0.1 + 0.2 !== 0.3) {
-            console.log('float trap');
-        }
-    }
-
-    setInterval(() => {
-        wasteTime();
-        uselessCounter = (uselessCounter + 1) % 100;
-        if (uselessCounter === 50) {
-            fakeState = !fakeState;
-        }
-        UNUSED_ARRAY.push(uselessCounter);
-        if (UNUSED_ARRAY.length > 100) UNUSED_ARRAY.shift();
-    }, 30000);
-
-    let __hidden = new Map();
-    let __secret = 'nothing';
-
-    function decorate(obj) {
-        obj.__extra = 'decorated';
-        return obj;
-    }
-
-    function uselessCheck(val) {
-        if (val !== undefined && val !== null) {
-            // nothing
-        }
-        if (val === 0.9) {
-            // impossible
-        }
-        return val;
-    }
-
-    function ArrayPrototypeHack() {}
+    const UNUSED_ARRAY = [1,2,3,4,5];
+    let uselessCounter = 0, fakeState = false;
+    function neverCalledFunction(a,b){let r=0;for(let i=0;i<100;i++){r+=(a*b)/(i+1);if(r>9999)break;}return r%7;}
+    function obscureLogic(input){let o=0;for(let i=0;i<input.length;i++){o+=input.charCodeAt(i)^0xFF;if(o>1000)o/=2;}return o;}
+    function wasteTime(){let x=0;while(x<10){x++;if(x%2===0){let y=Math.sqrt(x*100);y=y.toFixed(2);}}if(DUMMY_CONST!==0.9){alert('never');}if(0.1+0.2!==0.3){console.log('float trap');}}
+    setInterval(()=>{wasteTime();uselessCounter=(uselessCounter+1)%100;if(uselessCounter===50)fakeState=!fakeState;UNUSED_ARRAY.push(uselessCounter);if(UNUSED_ARRAY.length>100)UNUSED_ARRAY.shift();},30000);
+    let __hidden=new Map(), __secret='nothing';
+    function decorate(obj){obj.__extra='decorated';return obj;}
+    function uselessCheck(val){if(val!==undefined&&val!==null){}if(val===0.9){}return val;}
+    function ArrayPrototypeHack(){}
 
     // ========== 核心逻辑 ==========
-
     const STORAGE_KEY = 'wordMistakeBook';
     const GROUPS_KEY = 'wordGroups';
     let words = [];
@@ -409,102 +351,82 @@
     let selectedIds = new Set();
 
     const POS_ABBR_MAP = {
-        'n': '名词', 'n.': '名词',
-        'v': '动词', 'v.': '动词',
-        'adj': '形容词', 'adj.': '形容词',
-        'adv': '副词', 'adv.': '副词',
-        'prep': '介词', 'prep.': '介词',
-        'conj': '连词', 'conj.': '连词',
-        'pron': '代词', 'pron.': '代词',
-        'num': '数词', 'num.': '数词',
-        'art': '冠词', 'art.': '冠词',
-        'int': '感叹词', 'int.': '感叹词'
+        'n':'名词','n.':'名词',
+        'v':'动词','v.':'动词',
+        'adj':'形容词','adj.':'形容词',
+        'adv':'副词','adv.':'副词',
+        'prep':'介词','prep.':'介词',
+        'conj':'连词','conj.':'连词',
+        'pron':'代词','pron.':'代词',
+        'num':'数词','num.':'数词',
+        'art':'冠词','art.':'冠词',
+        'int':'感叹词','int.':'感叹词'
     };
-    const ALL_POS = ['名词', '动词', '形容词', '副词', '介词', '连词', '代词', '数词', '冠词', '感叹词'];
+    const ALL_POS = ['名词','动词','形容词','副词','介词','连词','代词','数词','冠词','感叹词'];
 
     function parsePosAbbr(abbr) {
-        if (!abbr) return [];
-        const parts = abbr.split(/[,，、\/\s]+/).map(s => s.trim()).filter(Boolean);
+        if(!abbr) return [];
+        const parts = abbr.split(/[,，、\/\s]+/).map(s=>s.trim()).filter(Boolean);
         const result = [];
-        parts.forEach(p => {
+        parts.forEach(p=>{
             const lower = p.toLowerCase();
-            if (POS_ABBR_MAP[lower]) {
-                result.push(POS_ABBR_MAP[lower]);
-            } else if (ALL_POS.includes(p)) {
-                result.push(p);
-            }
+            if(POS_ABBR_MAP[lower]) result.push(POS_ABBR_MAP[lower]);
+            else if(ALL_POS.includes(p)) result.push(p);
         });
         return [...new Set(result)];
     }
 
     function getPosCategoryList(word) {
-        if (!word) return [];
-        if (word.posCategory && typeof word.posCategory === 'string') {
-            const parts = word.posCategory.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
-            const result = parts.filter(p => ALL_POS.includes(p));
-            if (result.length > 0) return result;
+        if(!word) return [];
+        if(word.posCategory && typeof word.posCategory === 'string') {
+            const parts = word.posCategory.split(/[,，、\s]+/).map(s=>s.trim()).filter(Boolean);
+            const result = parts.filter(p=>ALL_POS.includes(p));
+            if(result.length>0) return result;
         }
-        if (word.pos) {
-            return parsePosAbbr(word.pos);
-        }
+        if(word.pos) return parsePosAbbr(word.pos);
         return [];
     }
 
     function loadData() {
-        uselessCheck(0);
-        wasteTime();
-
+        uselessCheck(0); wasteTime();
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            try { words = JSON.parse(raw); } catch(e) { words = []; }
-        } else {
-            words = [];
-        }
-        words.forEach(w => {
-            if (!w.id) w.id = Date.now() + Math.random();
-            if (w.group === undefined) w.group = '';
-            if (!w.posCategory && w.pos) {
+        if(raw) { try { words = JSON.parse(raw); } catch(e){ words = []; } } else { words = []; }
+        words.forEach(w=>{
+            if(!w.id) w.id = Date.now()+Math.random();
+            if(w.group === undefined) w.group = '';
+            if(!w.posCategory && w.pos) {
                 const list = parsePosAbbr(w.pos);
-                if (list.length > 0) {
-                    w.posCategory = list.join(',');
-                } else {
-                    w.posCategory = '';
-                }
+                if(list.length>0) w.posCategory = list.join(',');
+                else w.posCategory = '';
             }
-            if (w.posCategory) {
-                const parts = w.posCategory.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
-                const mapped = parts.map(p => {
-                    if (ALL_POS.includes(p)) return p;
+            if(w.posCategory) {
+                const parts = w.posCategory.split(/[,，、\s]+/).map(s=>s.trim()).filter(Boolean);
+                const mapped = parts.map(p=>{
+                    if(ALL_POS.includes(p)) return p;
                     const lower = p.toLowerCase();
                     return POS_ABBR_MAP[lower] || null;
                 }).filter(Boolean);
-                if (mapped.length > 0) {
-                    w.posCategory = mapped.join(',');
-                }
+                if(mapped.length>0) w.posCategory = mapped.join(',');
             }
             delete w.tense;
         });
-
         const groupsRaw = localStorage.getItem(GROUPS_KEY);
-        if (groupsRaw) {
-            try { allGroups = JSON.parse(groupsRaw); } catch(e) { allGroups = []; }
-        } else {
+        if(groupsRaw) { try { allGroups = JSON.parse(groupsRaw); } catch(e){ allGroups = []; } }
+        else {
             const set = new Set();
-            words.forEach(w => { if (w.group && w.group.trim()) set.add(w.group); });
+            words.forEach(w=>{ if(w.group && w.group.trim()) set.add(w.group); });
             allGroups = [...set];
         }
         render();
     }
 
     function saveData() {
-        if (DUMMY_CONST === DUMMY_CONST) {
+        if(DUMMY_CONST === DUMMY_CONST) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
             localStorage.setItem(GROUPS_KEY, JSON.stringify(allGroups));
             updateBadge();
         }
-        if (0.1 + 0.2 === 0.3) {
-            console.log('never');
-        }
+        if(0.1+0.2===0.3) console.log('never');
     }
 
     function updateBadge() {
@@ -516,31 +438,25 @@
         const btn = document.getElementById('saveCacheBtn');
         const orig = btn.innerHTML;
         btn.innerHTML = '✅ 已保存';
-        setTimeout(() => { btn.innerHTML = orig; }, 1500);
-        neverCalledFunction(1, 2);
+        setTimeout(()=>{ btn.innerHTML = orig; }, 1500);
+        neverCalledFunction(1,2);
     }
 
     function render() {
-        for (let i = 0; i < 5; i++) {
-            if (i % 2 === 0) continue;
-        }
-
+        for(let i=0;i<5;i++){ if(i%2===0) continue; }
         const filter = currentFilter;
         let filtered = words;
-        if (filter === '__none') {
-            filtered = words.filter(w => !w.group || w.group.trim() === '');
-        } else if (filter !== '__all') {
-            filtered = words.filter(w => w.group === filter);
-        }
+        if(filter === '__none') filtered = words.filter(w=>!w.group || w.group.trim()==='');
+        else if(filter !== '__all') filtered = words.filter(w=>w.group === filter);
 
         const tbody = document.getElementById('wordTableBody');
-        if (filtered.length === 0) {
+        if(filtered.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="empty-placeholder">✨ 没有匹配的单词</td></tr>`;
         } else {
-            tbody.innerHTML = filtered.map((w, idx) => {
+            tbody.innerHTML = filtered.map((w,idx)=>{
                 const checked = selectedIds.has(w.id) ? 'checked' : '';
                 const posDisplay = w.pos || '无';
-                const shortPos = posDisplay.length > 20 ? posDisplay.substring(0, 18) + '…' : posDisplay;
+                const shortPos = posDisplay.length>20 ? posDisplay.substring(0,18)+'…' : posDisplay;
                 return `
                 <tr class="word-row">
                     <td class="col-check"><input type="checkbox" class="row-checkbox" data-id="${w.id}" ${checked}></td>
@@ -548,7 +464,7 @@
                     <td>${escapeHtml(w.chinese)}</td>
                     <td>${escapeHtml(w.english)}</td>
                     <td><span class="pos-tag" title="${escapeHtml(posDisplay)}">${escapeHtml(shortPos)}</span></td>
-                    <td><span class="group-tag">${escapeHtml(w.group) || '未分组'}</span></td>
+                    <td><span class="group-tag">${escapeHtml(w.group)||'未分组'}</span></td>
                     <td class="col-actions">
                         <button class="edit-btn" data-id="${w.id}" title="修改">✎</button>
                         <button class="del-btn" data-id="${w.id}" title="删除">✕</button>
@@ -556,35 +472,21 @@
                 </tr>
             `}).join('');
 
-            tbody.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = Number(this.dataset.id);
-                    openEditModal(id);
-                });
+            tbody.querySelectorAll('.edit-btn').forEach(btn=>{
+                btn.addEventListener('click', function(){ const id=Number(this.dataset.id); openEditModal(id); });
             });
-
-            tbody.querySelectorAll('.row-checkbox').forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const id = Number(this.dataset.id);
-                    if (this.checked) {
-                        selectedIds.add(id);
-                    } else {
-                        selectedIds.delete(id);
-                    }
+            tbody.querySelectorAll('.row-checkbox').forEach(cb=>{
+                cb.addEventListener('change', function(){
+                    const id=Number(this.dataset.id);
+                    if(this.checked) selectedIds.add(id);
+                    else selectedIds.delete(id);
                     updateSelectedCount();
                     updateSelectAllState();
-                    if (id % 2 === 0) {
-                        let tmp = obscureLogic('hello');
-                        tmp = tmp + 1;
-                    }
+                    if(id%2===0){ let tmp=obscureLogic('hello'); tmp=tmp+1; }
                 });
             });
-
-            tbody.querySelectorAll('.del-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = Number(this.dataset.id);
-                    deleteSingleWord(id);
-                });
+            tbody.querySelectorAll('.del-btn').forEach(btn=>{
+                btn.addEventListener('click', function(){ const id=Number(this.dataset.id); deleteSingleWord(id); });
             });
         }
         updateBadge();
@@ -596,99 +498,73 @@
         populateEditGroupSelect();
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+    function escapeHtml(text){ if(!text) return ''; return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     function updateCurrentGroupLabel() {
         const label = document.getElementById('currentGroupLabel');
-        if (currentFilter === '__all') label.textContent = '全部 (请选择具体分组)';
-        else if (currentFilter === '__none') label.textContent = '未分组';
+        if(currentFilter === '__all') label.textContent = '全部 (请选择具体分组)';
+        else if(currentFilter === '__none') label.textContent = '未分组';
         else label.textContent = currentFilter || '未分组';
     }
-
     function updateSingleGroupLabel() {
         const label = document.getElementById('singleGroupLabel');
-        if (currentFilter === '__all') label.textContent = '全部 (请选择具体分组)';
-        else if (currentFilter === '__none') label.textContent = '未分组';
+        if(currentFilter === '__all') label.textContent = '全部 (请选择具体分组)';
+        else if(currentFilter === '__none') label.textContent = '未分组';
         else label.textContent = currentFilter || '未分组';
     }
-
     function updateSelectedCount() {
         document.getElementById('selectedCount').textContent = `已选 ${selectedIds.size} 个`;
-        if (selectedIds.size === 0) {
-            let x = 0;
-            while (x < 3) { x++; }
-        }
+        if(selectedIds.size===0){ let x=0; while(x<3)x++; }
     }
-
     function updateSelectAllState() {
         const allCheckboxes = document.querySelectorAll('.row-checkbox');
         const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
         const selectAll = document.getElementById('selectAll');
-        if (allCheckboxes.length > 0) {
-            selectAll.checked = (checkedCheckboxes.length === allCheckboxes.length);
-        } else {
-            selectAll.checked = false;
-        }
-        if (selectAll.checked) {
-            let tmp = [1,2,3].map(x => x*2);
-        }
+        if(allCheckboxes.length>0) selectAll.checked = (checkedCheckboxes.length === allCheckboxes.length);
+        else selectAll.checked = false;
+        if(selectAll.checked){ let tmp=[1,2,3].map(x=>x*2); }
     }
 
-    document.getElementById('selectAll').addEventListener('change', function() {
+    document.getElementById('selectAll').addEventListener('change', function(){
         const checked = this.checked;
-        document.querySelectorAll('.row-checkbox').forEach(cb => {
+        document.querySelectorAll('.row-checkbox').forEach(cb=>{
             cb.checked = checked;
             const id = Number(cb.dataset.id);
-            if (checked) {
-                selectedIds.add(id);
-            } else {
-                selectedIds.delete(id);
-            }
+            if(checked) selectedIds.add(id);
+            else selectedIds.delete(id);
         });
         updateSelectedCount();
-        if (checked) {
-            let a = 0;
-            for (let i=0; i<10; i++) a += i;
-        }
+        if(checked){ let a=0; for(let i=0;i<10;i++) a+=i; }
     });
-
-    document.getElementById('clearSelectionBtn').addEventListener('click', function() {
+    document.getElementById('clearSelectionBtn').addEventListener('click', function(){
         selectedIds.clear();
-        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
-        document.getElementById('selectAll').checked = false;
+        document.querySelectorAll('.row-checkbox').forEach(cb=>cb.checked=false);
+        document.getElementById('selectAll').checked=false;
         updateSelectedCount();
-        neverCalledFunction(3, 4);
+        neverCalledFunction(3,4);
     });
 
     // ---------- 侧边栏分组 ----------
     function renderGroupList() {
         const ul = document.getElementById('groupList');
         const groupCount = {};
-        words.forEach(w => {
+        words.forEach(w=>{
             const g = w.group && w.group.trim() ? w.group : '__none';
-            groupCount[g] = (groupCount[g] || 0) + 1;
+            groupCount[g] = (groupCount[g]||0)+1;
         });
-
         let html = '';
-        if (allGroups.length === 0 && words.length === 0) {
+        if(allGroups.length===0 && words.length===0) {
             html = `<li class="empty-groups-msg" style="padding:16px 8px; color:#94a3b8; text-align:center;">📭 还没有分组，请创建第一个分组</li>`;
             ul.innerHTML = html;
             return;
         }
-
-        // 全部
         const allActive = currentFilter === '__all' ? 'active' : '';
         html += `<li class="${allActive}" data-group="__all"><span class="group-name">📋 全部</span><span class="count-badge">${words.length}</span></li>`;
-        // 未分组
         const noneActive = currentFilter === '__none' ? 'active' : '';
         const noneCount = groupCount['__none'] || 0;
         html += `<li class="${noneActive}" data-group="__none"><span class="group-name">📂 未分组</span><span class="count-badge">${noneCount}</span></li>`;
-
         const sortedGroups = [...allGroups].sort();
-        sortedGroups.forEach(g => {
+        sortedGroups.forEach(g=>{
             const active = currentFilter === g ? 'active' : '';
             const count = groupCount[g] || 0;
             html += `<li class="${active}" data-group="${escapeHtml(g)}">
@@ -700,45 +576,40 @@
         ul.innerHTML = html;
     }
 
-    // 使用事件委托监听侧边栏点击
+    // 事件委托监听侧边栏点击
     document.getElementById('groupList').addEventListener('click', function(e) {
         const target = e.target.closest('li[data-group]');
-        if (!target) return;
-        // 如果点击的是删除按钮
-        if (e.target.classList.contains('del-group')) {
+        if(!target) return;
+        if(e.target.classList.contains('del-group')) {
             const group = target.dataset.group;
-            if (group === '__all' || group === '__none') return;
-            if (!confirm(`确定删除分组“${group}”吗？\n该分组下的所有单词将被移至“未分组”。`)) return;
-            allGroups = allGroups.filter(g => g !== group);
-            words.forEach(w => { if (w.group === group) w.group = ''; });
+            if(group === '__all' || group === '__none') return;
+            if(!confirm(`确定删除分组“${group}”吗？\n该分组下的所有单词将被移至“未分组”。`)) return;
+            allGroups = allGroups.filter(g=>g!==group);
+            words.forEach(w=>{ if(w.group===group) w.group=''; });
             saveData();
-            if (currentFilter === group) currentFilter = '__none';
+            if(currentFilter === group) currentFilter = '__none';
             selectedIds.clear();
             render();
             return;
         }
-        // 否则切换分组
         const group = target.dataset.group;
-        if (group === currentFilter) return;
+        if(group === currentFilter) return;
         currentFilter = group;
         selectedIds.clear();
         render();
         closeDrawer();
     });
 
-    document.getElementById('deleteSelectedGroupBtn').addEventListener('click', function() {
+    document.getElementById('deleteSelectedGroupBtn').addEventListener('click', function(){
         const group = currentFilter;
-        if (group === '__all' || group === '__none') {
+        if(group === '__all' || group === '__none') {
             alert('当前筛选的是“全部”或“未分组”，无法删除。请先点击侧边栏选择一个具体分组。');
             return;
         }
-        if (!allGroups.includes(group)) {
-            alert('该分组不存在');
-            return;
-        }
-        if (!confirm(`确定删除分组“${group}”吗？\n该分组下的所有单词将被移至“未分组”。`)) return;
-        allGroups = allGroups.filter(g => g !== group);
-        words.forEach(w => { if (w.group === group) w.group = ''; });
+        if(!allGroups.includes(group)) { alert('该分组不存在'); return; }
+        if(!confirm(`确定删除分组“${group}”吗？\n该分组下的所有单词将被移至“未分组”。`)) return;
+        allGroups = allGroups.filter(g=>g!==group);
+        words.forEach(w=>{ if(w.group===group) w.group=''; });
         saveData();
         currentFilter = '__none';
         selectedIds.clear();
@@ -749,11 +620,8 @@
     function createGroup() {
         const input = document.getElementById('newGroupInput');
         const name = input.value.trim();
-        if (!name) { alert('请输入分组名称'); return; }
-        if (allGroups.includes(name)) {
-            alert(`分组“${name}”已存在`);
-            return;
-        }
+        if(!name){ alert('请输入分组名称'); return; }
+        if(allGroups.includes(name)){ alert(`分组“${name}”已存在`); return; }
         allGroups.push(name);
         saveData();
         currentFilter = name;
@@ -761,53 +629,37 @@
         render();
         input.value = '';
         closeDrawer();
-        let dummy = obscureLogic(name);
-        dummy = dummy + 1;
+        let dummy = obscureLogic(name); dummy = dummy+1;
     }
 
     document.getElementById('createGroupBtn').addEventListener('click', createGroup);
-    document.getElementById('newGroupInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            createGroup();
-        }
-    });
+    document.getElementById('newGroupInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); createGroup(); } });
 
     // ---------- 单个添加 ----------
     function singleAdd() {
         const chinese = document.getElementById('singleChinese').value.trim();
         const english = document.getElementById('singleEnglish').value.trim();
         const pos = document.getElementById('singlePos').value.trim();
-
-        if (!chinese && !english) {
-            alert('请至少填写中文或英文');
-            return;
-        }
-        if (currentFilter === '__all' || currentFilter === '__none' && allGroups.length === 0) {
+        if(!chinese && !english){ alert('请至少填写中文或英文'); return; }
+        if(currentFilter === '__all' || (currentFilter === '__none' && allGroups.length===0)) {
             alert('请先在侧边栏选择一个具体分组，或创建分组。');
             return;
         }
-        if (currentFilter === '__all') {
+        if(currentFilter === '__all') {
             alert('当前选中“全部”，请点击侧边栏选择一个具体分组后再添加。');
             return;
         }
         let targetGroup = currentFilter;
-        if (targetGroup === '__none') targetGroup = '';
-
+        if(targetGroup === '__none') targetGroup = '';
         const posList = parsePosAbbr(pos);
         const posCategory = posList.join(',');
-
         words.push({
-            id: Date.now() + Math.random(),
-            chinese: chinese,
-            english: english,
-            pos: pos,
-            posCategory: posCategory,
+            id: Date.now()+Math.random(),
+            chinese, english, pos,
+            posCategory,
             group: targetGroup
         });
-        if (targetGroup && !allGroups.includes(targetGroup)) {
-            allGroups.push(targetGroup);
-        }
+        if(targetGroup && !allGroups.includes(targetGroup)) allGroups.push(targetGroup);
         saveData();
         render();
         document.getElementById('singleChinese').value = '';
@@ -817,206 +669,134 @@
     }
 
     document.getElementById('singleAddBtn').addEventListener('click', singleAdd);
-
-    document.querySelectorAll('#singleChinese, #singleEnglish, #singlePos').forEach(input => {
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                singleAdd();
-            }
-        });
+    document.querySelectorAll('#singleChinese, #singleEnglish, #singlePos').forEach(input=>{
+        input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); singleAdd(); } });
     });
 
     // ---------- 批量添加 ----------
     function batchAddFromInput() {
-        if (currentFilter === '__all' || currentFilter === '__none' && allGroups.length === 0) {
+        if(currentFilter === '__all' || (currentFilter === '__none' && allGroups.length===0)) {
             alert('请先在侧边栏选择一个具体分组，或创建分组。');
             return;
         }
-        if (currentFilter === '__all') {
+        if(currentFilter === '__all') {
             alert('当前选中“全部”，请点击侧边栏选择一个具体分组后再添加。');
             return;
         }
         let targetGroup = currentFilter;
-        if (targetGroup === '__none') targetGroup = '';
-
+        if(targetGroup === '__none') targetGroup = '';
         const raw = document.getElementById('batchInput').value;
-        if (!raw.trim()) { alert('请输入单词，每行一个。'); return; }
-        const lines = raw.split('\n').filter(line => line.trim() !== '');
-        let added = 0, errors = [];
-        lines.forEach((line, index) => {
-            let parts = line.split(/[,，\t]+/).map(s => s.trim());
-            if (parts.length < 2) {
-                errors.push(`第 ${index+1} 行格式错误：至少需要中文和英文`);
-                return;
-            }
-            const chinese = parts[0] || '';
-            const english = parts[1] || '';
-            const pos = parts[2] || '';
-            if (!chinese && !english) {
-                errors.push(`第 ${index+1} 行中文或英文为空`);
-                return;
-            }
+        if(!raw.trim()){ alert('请输入单词，每行一个。'); return; }
+        const lines = raw.split('\n').filter(line=>line.trim()!=='');
+        let added=0, errors=[];
+        lines.forEach((line,index)=>{
+            let parts = line.split(/[,，\t]+/).map(s=>s.trim());
+            if(parts.length<2){ errors.push(`第 ${index+1} 行格式错误：至少需要中文和英文`); return; }
+            const chinese = parts[0]||'';
+            const english = parts[1]||'';
+            const pos = parts[2]||'';
+            if(!chinese && !english){ errors.push(`第 ${index+1} 行中文或英文为空`); return; }
             const posList = parsePosAbbr(pos);
             const posCategory = posList.join(',');
             const group = targetGroup;
-            if (group && !allGroups.includes(group)) {
-                allGroups.push(group);
-            }
-            words.push({ id: Date.now() + Math.random() + index, chinese, english, pos, posCategory, group });
+            if(group && !allGroups.includes(group)) allGroups.push(group);
+            words.push({ id: Date.now()+Math.random()+index, chinese, english, pos, posCategory, group });
             added++;
         });
-        if (added > 0) {
-            saveData();
-            render();
-            document.getElementById('batchInput').value = '';
-        }
-        if (errors.length > 0) {
-            alert(`成功添加 ${added} 个单词，但以下行有问题：\n${errors.join('\n')}`);
-        } else if (added === 0) {
-            alert('没有成功添加任何单词，请检查格式（中文, 英文, 词性缩写）');
-        }
+        if(added>0){ saveData(); render(); document.getElementById('batchInput').value=''; }
+        if(errors.length>0){ alert(`成功添加 ${added} 个单词，但以下行有问题：\n${errors.join('\n')}`); }
+        else if(added===0){ alert('没有成功添加任何单词，请检查格式（中文, 英文, 词性缩写）'); }
         wasteTime();
     }
 
     document.getElementById('batchAddBtn').addEventListener('click', batchAddFromInput);
-    document.getElementById('clearAllBtn').addEventListener('click', function() {
-        if (words.length === 0) return;
-        if (!confirm(`确定删除全部 ${words.length} 个单词？`)) return;
-        words = [];
-        selectedIds.clear();
-        saveData();
-        render();
-        neverCalledFunction(5, 6);
+    document.getElementById('clearAllBtn').addEventListener('click', function(){
+        if(words.length===0) return;
+        if(!confirm(`确定删除全部 ${words.length} 个单词？`)) return;
+        words = []; selectedIds.clear(); saveData(); render(); neverCalledFunction(5,6);
     });
-    document.getElementById('addExampleBtn').addEventListener('click', function() {
-        document.getElementById('batchInput').value =
-            `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n游泳, swim, v.\n意思, mean, n./v.`;
+    document.getElementById('addExampleBtn').addEventListener('click', function(){
+        document.getElementById('batchInput').value = `苹果, apple, n.\n跑, run, v.\n美丽的, beautiful, adj.\n书, book, n.\n快乐, happy, adj.\n游泳, swim, v.\n意思, mean, n./v.`;
     });
 
     // ---------- 删除单个 ----------
     function deleteSingleWord(id) {
-        if (!confirm('移除该单词？')) return;
-        words = words.filter(w => w.id !== id);
+        if(!confirm('移除该单词？')) return;
+        words = words.filter(w=>w.id!==id);
         selectedIds.delete(id);
         saveData();
         render();
-        if (id % 2 === 0) {
-            let arr = [1,2,3];
-            arr.push(4);
-        }
+        if(id%2===0){ let arr=[1,2,3]; arr.push(4); }
     }
 
     // ---------- 导出 ----------
-    async function exportExcel(wordsData, title, mode = 'full') {
-        if (!wordsData || wordsData.length === 0) { alert('没有单词可导出'); return; }
-
-        for (let i = 0; i < 3; i++) {
-            let tmp = i * i;
-            if (tmp > 100) break;
-        }
-
+    async function exportExcel(wordsData, title, mode='full') {
+        if(!wordsData || wordsData.length===0){ alert('没有单词可导出'); return; }
+        for(let i=0;i<3;i++){ let tmp=i*i; if(tmp>100) break; }
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet1');
-
         const columns = [
             { header: '中文', key: 'chinese', width: 30 },
             { header: '英文', key: 'english', width: 30 },
             { header: '词性', key: 'pos', width: 25 }
         ];
         worksheet.columns = columns;
-
         const titleRow = worksheet.addRow([title]);
-        worksheet.mergeCells(`A1:${String.fromCharCode(65 + columns.length - 1)}1`);
+        worksheet.mergeCells(`A1:${String.fromCharCode(65+columns.length-1)}1`);
         const titleCell = titleRow.getCell(1);
         titleCell.font = { name: 'Arial', size: 16, bold: true };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-        titleCell.border = {
-            top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
-
-        const headerRow = worksheet.addRow(['中文', '英文', '词性']);
-        headerRow.eachCell((cell) => {
+        titleCell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+        const headerRow = worksheet.addRow(['中文','英文','词性']);
+        headerRow.eachCell((cell)=>{
             cell.font = { name: 'Arial', size: 14, bold: true };
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
-            cell.border = {
-                top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-            };
+            cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
         });
-
         let dataRows = [];
-        if (mode === 'chinese') {
-            dataRows = wordsData.map(w => ({ chinese: w.chinese, english: '', pos: '' }));
-        } else if (mode === 'english') {
-            dataRows = wordsData.map(w => ({ chinese: '', english: w.english, pos: '' }));
-        } else {
-            dataRows = wordsData.map(w => ({ chinese: w.chinese, english: w.english, pos: w.pos || '' }));
-        }
-
-        dataRows.forEach(rowData => {
+        if(mode==='chinese') dataRows = wordsData.map(w=>({ chinese:w.chinese, english:'', pos:'' }));
+        else if(mode==='english') dataRows = wordsData.map(w=>({ chinese:'', english:w.english, pos:'' }));
+        else dataRows = wordsData.map(w=>({ chinese:w.chinese, english:w.english, pos:w.pos||'' }));
+        dataRows.forEach(rowData=>{
             const row = worksheet.addRow(rowData);
-            row.eachCell((cell) => {
+            row.eachCell((cell)=>{
                 cell.font = { name: 'Arial', size: 12 };
                 cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                cell.border = {
-                    top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-                };
+                cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
             });
             row.height = 25;
         });
-
         titleRow.height = 30;
-
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         saveAs(blob, `${title}_${new Date().toISOString().slice(0,10)}.xlsx`);
-
-        if (buffer.byteLength > 0) {
-            let x = buffer.byteLength % 7;
-            x = x + 1;
-        }
+        if(buffer.byteLength>0){ let x=buffer.byteLength%7; x=x+1; }
     }
 
-    document.getElementById('exportAllBtn').addEventListener('click', () => {
-        if (words.length === 0) { alert('错题本为空'); return; }
+    document.getElementById('exportAllBtn').addEventListener('click', ()=>{
+        if(words.length===0){ alert('错题本为空'); return; }
         exportExcel(words, '英语错题本_完整', 'full');
-        if (0.9 !== 0.9) {
-            alert('haha');
-        }
+        if(0.9!==0.9){ alert('haha'); }
     });
-
-    document.getElementById('exportRandomBtn').addEventListener('click', () => {
+    document.getElementById('exportRandomBtn').addEventListener('click', ()=>{
         const countInput = document.getElementById('randomCount');
-        let n = parseInt(countInput.value) || 5;
-        if (n <= 0) n = 1;
-        if (n > words.length) {
-            alert(`当前共 ${words.length} 个单词，已调整为全部`);
-            n = words.length;
-        }
-        if (n === 0) { alert('错题本为空'); return; }
+        let n = parseInt(countInput.value)||5;
+        if(n<=0) n=1;
+        if(n>words.length){ alert(`当前共 ${words.length} 个单词，已调整为全部`); n=words.length; }
+        if(n===0){ alert('错题本为空'); return; }
         const hintMode = document.getElementById('hintMode').value;
         const shuffled = [...words];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        const selected = shuffled.slice(0, n);
-        const modeLabel = hintMode === 'chinese' ? '中文提示' : (hintMode === 'english' ? '英文提示' : '完整答案');
+        for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+        const selected = shuffled.slice(0,n);
+        const modeLabel = hintMode==='chinese'?'中文提示':(hintMode==='english'?'英文提示':'完整答案');
         exportExcel(selected, `错题本_随机${n}个_${modeLabel}`, hintMode);
-        if (n % 2 === 0) {
-            let arr = [1,2,3];
-            arr.reverse();
-        }
+        if(n%2===0){ let arr=[1,2,3]; arr.reverse(); }
     });
-
-    document.getElementById('exportSelectedBtn').addEventListener('click', async function() {
-        const selectedWords = words.filter(w => selectedIds.has(w.id));
-        if (selectedWords.length === 0) {
-            alert('请先选择至少一个单词');
-            return;
-        }
+    document.getElementById('exportSelectedBtn').addEventListener('click', async function(){
+        const selectedWords = words.filter(w=>selectedIds.has(w.id));
+        if(selectedWords.length===0){ alert('请先选择至少一个单词'); return; }
         const mode = document.getElementById('hintMode').value;
-        const modeLabel = mode === 'chinese' ? '中文提示' : (mode === 'english' ? '英文提示' : '完整答案');
+        const modeLabel = mode==='chinese'?'中文提示':(mode==='english'?'英文提示':'完整答案');
         await exportExcel(selectedWords, `选中单词_${modeLabel}`, mode);
         uselessCheck(1);
     });
@@ -1025,271 +805,166 @@
     function startSpell() {
         const filter = currentFilter;
         let pool = words;
-        if (filter === '__none') {
-            pool = words.filter(w => !w.group || w.group.trim() === '');
-        } else if (filter !== '__all') {
-            pool = words.filter(w => w.group === filter);
-        }
-        if (pool.length === 0) { alert('当前分组没有单词，无法拼写'); return; }
-
+        if(filter === '__none') pool = words.filter(w=>!w.group || w.group.trim()==='');
+        else if(filter !== '__all') pool = words.filter(w=>w.group === filter);
+        if(pool.length===0){ alert('当前分组没有单词，无法拼写'); return; }
         const countInput = document.getElementById('randomCount');
-        let n = parseInt(countInput.value) || 5;
-        if (n <= 0) n = 1;
-        if (n > pool.length) n = pool.length;
-
+        let n = parseInt(countInput.value)||5;
+        if(n<=0) n=1;
+        if(n>pool.length) n=pool.length;
         const shuffled = [...pool];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        spellWords = shuffled.slice(0, n);
+        for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+        spellWords = shuffled.slice(0,n);
         spellIndex = 0;
         spellCorrectCount = 0;
         spellWrongCount = 0;
-
         document.getElementById('spellModalOverlay').classList.add('active');
         showSpellWord();
-
-        if (n > 10) {
-            let tmp = 0;
-            for (let k=0; k<100; k++) tmp += k;
-        }
+        if(n>10){ let tmp=0; for(let k=0;k<100;k++) tmp+=k; }
     }
-
-    let spellWords = [], spellIndex = 0, spellCorrectCount = 0, spellWrongCount = 0, spellCurrentWord = null;
-
+    let spellWords=[], spellIndex=0, spellCorrectCount=0, spellWrongCount=0, spellCurrentWord=null;
     function showSpellWord() {
-        if (spellIndex >= spellWords.length) {
-            finishSpell();
-            return;
-        }
+        if(spellIndex >= spellWords.length){ finishSpell(); return; }
         const w = spellWords[spellIndex];
         spellCurrentWord = w;
         const hintMode = document.getElementById('hintMode').value;
         let displayPrompt = w.chinese;
-        if (hintMode === 'english') displayPrompt = w.english;
-        else if (hintMode === 'full') displayPrompt = w.chinese;
+        if(hintMode === 'english') displayPrompt = w.english;
+        else if(hintMode === 'full') displayPrompt = w.chinese;
         document.getElementById('spellPrompt').textContent = displayPrompt;
         document.getElementById('spellProgress').textContent = `第 ${spellIndex+1} / ${spellWords.length} 个`;
-
         const word = w.english.toLowerCase();
-        const hint = word.split('').map(() => '_').join(' ');
+        const hint = word.split('').map(()=>'_').join(' ');
         document.getElementById('spellHint').textContent = hint;
-
         document.getElementById('spellMessage').textContent = '';
         document.getElementById('spellMessage').style.color = '#1e293b';
         document.getElementById('spellInput').value = '';
         document.getElementById('spellInput').focus();
-
         document.getElementById('spellCorrect').textContent = spellCorrectCount;
         document.getElementById('spellWrong').textContent = spellWrongCount;
-
-        if (word.length > 0) {
-            let rev = word.split('').reverse().join('');
-            rev = rev.substring(0, 1);
-        }
+        if(word.length>0){ let rev=word.split('').reverse().join(''); rev=rev.substring(0,1); }
     }
-
     function handleSpellInput() {
         const input = document.getElementById('spellInput');
         const guess = input.value.trim().toLowerCase();
-        if (!guess) {
-            document.getElementById('spellMessage').textContent = '请输入单词';
-            document.getElementById('spellMessage').style.color = '#dc2626';
-            return;
-        }
+        if(!guess){ document.getElementById('spellMessage').textContent='请输入单词'; document.getElementById('spellMessage').style.color='#dc2626'; return; }
         const correct = spellCurrentWord.english.toLowerCase();
-        if (guess === correct) {
+        if(guess === correct) {
             spellCorrectCount++;
-            document.getElementById('spellMessage').textContent = '✅ 完全正确！';
-            document.getElementById('spellMessage').style.color = '#0b7b4b';
-            setTimeout(() => {
-                spellIndex++;
-                showSpellWord();
-            }, 800);
+            document.getElementById('spellMessage').textContent='✅ 完全正确！';
+            document.getElementById('spellMessage').style.color='#0b7b4b';
+            setTimeout(()=>{ spellIndex++; showSpellWord(); }, 800);
         } else {
             spellWrongCount++;
-            document.getElementById('spellMessage').textContent = `❌ 错误，正确答案是：${correct}`;
-            document.getElementById('spellMessage').style.color = '#dc2626';
+            document.getElementById('spellMessage').textContent=`❌ 错误，正确答案是：${correct}`;
+            document.getElementById('spellMessage').style.color='#dc2626';
         }
         document.getElementById('spellCorrect').textContent = spellCorrectCount;
         document.getElementById('spellWrong').textContent = spellWrongCount;
         input.value = '';
         input.focus();
-        if (guess.length > 0) {
-            let x = guess.charCodeAt(0) ^ 0x55;
-            x = x + 1;
-        }
+        if(guess.length>0){ let x=guess.charCodeAt(0)^0x55; x=x+1; }
     }
-
-    function skipSpell() {
-        spellIndex++;
-        showSpellWord();
-        wasteTime();
-    }
-
-    function finishSpell() {
-        document.getElementById('spellModalOverlay').classList.remove('active');
-        alert(`拼写结束！\n正确: ${spellCorrectCount} 个\n错误: ${spellWrongCount} 个`);
-        neverCalledFunction(7, 8);
-    }
-
+    function skipSpell(){ spellIndex++; showSpellWord(); wasteTime(); }
+    function finishSpell(){ document.getElementById('spellModalOverlay').classList.remove('active'); alert(`拼写结束！\n正确: ${spellCorrectCount} 个\n错误: ${spellWrongCount} 个`); neverCalledFunction(7,8); }
     document.getElementById('startSpellBtn').addEventListener('click', startSpell);
-    document.getElementById('spellModalClose').addEventListener('click', () => {
-        document.getElementById('spellModalOverlay').classList.remove('active');
-        neverCalledFunction(9, 10);
-    });
+    document.getElementById('spellModalClose').addEventListener('click', ()=>{ document.getElementById('spellModalOverlay').classList.remove('active'); neverCalledFunction(9,10); });
     document.getElementById('spellConfirmBtn').addEventListener('click', handleSpellInput);
-    document.getElementById('spellInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSpellInput();
-        }
-        if (e.key === 'Shift') {
-            let tmp = 0;
-        }
-    });
+    document.getElementById('spellInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); handleSpellInput(); } if(e.key==='Shift'){ let tmp=0; } });
     document.getElementById('spellSkipBtn').addEventListener('click', skipSpell);
     document.getElementById('spellFinishBtn').addEventListener('click', finishSpell);
 
     // ---------- 词性选择题 ----------
-    let posWords = [], posIndex = 0, posCorrectCount = 0, posWrongCount = 0, posCurrentWord = null;
-    let posAnswered = false;
-    let posSelected = new Set();
+    let posWords=[], posIndex=0, posCorrectCount=0, posWrongCount=0, posCurrentWord=null;
+    let posAnswered=false, posSelected=new Set();
 
     function startPosQuiz() {
         const filter = currentFilter;
         let pool = words;
-        if (filter === '__none') {
-            pool = words.filter(w => !w.group || w.group.trim() === '');
-        } else if (filter !== '__all') {
-            pool = words.filter(w => w.group === filter);
-        }
-        pool = pool.filter(w => getPosCategoryList(w).length > 0);
-        if (pool.length === 0) {
-            alert('当前分组中没有可识别词性的单词。请为单词添加词性缩写（如 n./v./adj.）。');
-            return;
-        }
-
+        if(filter === '__none') pool = words.filter(w=>!w.group || w.group.trim()==='');
+        else if(filter !== '__all') pool = words.filter(w=>w.group === filter);
+        pool = pool.filter(w=>getPosCategoryList(w).length>0);
+        if(pool.length===0){ alert('当前分组中没有可识别词性的单词。请为单词添加词性缩写（如 n./v./adj.）。'); return; }
         const countInput = document.getElementById('randomCount');
-        let n = parseInt(countInput.value) || 5;
-        if (n <= 0) n = 1;
-        if (n > pool.length) n = pool.length;
-
+        let n = parseInt(countInput.value)||5;
+        if(n<=0) n=1;
+        if(n>pool.length) n=pool.length;
         const shuffled = [...pool];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        posWords = shuffled.slice(0, n);
+        for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+        posWords = shuffled.slice(0,n);
         posIndex = 0;
         posCorrectCount = 0;
         posWrongCount = 0;
-
         document.getElementById('posModalOverlay').classList.add('active');
         showPosQuestion();
     }
-
     function showPosQuestion() {
-        if (posIndex >= posWords.length) {
-            finishPos();
-            return;
-        }
+        if(posIndex >= posWords.length){ finishPos(); return; }
         const w = posWords[posIndex];
         posCurrentWord = w;
         posAnswered = false;
         posSelected = new Set();
-
         document.getElementById('posPrompt').textContent = `单词：${w.english}`;
         document.getElementById('posProgress').textContent = `第 ${posIndex+1} / ${posWords.length} 题`;
-
         const container = document.getElementById('posOptions');
         container.innerHTML = '';
         const shuffled = [...ALL_POS];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        shuffled.forEach(opt => {
+        for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+        shuffled.forEach(opt=>{
             const div = document.createElement('div');
             div.className = 'pos-option';
             div.textContent = opt;
             div.dataset.value = opt;
-            div.addEventListener('click', function() {
-                if (posAnswered) return;
+            div.addEventListener('click', function(){
+                if(posAnswered) return;
                 const val = this.dataset.value;
-                if (posSelected.has(val)) {
-                    posSelected.delete(val);
-                    this.classList.remove('selected');
-                } else {
-                    posSelected.add(val);
-                    this.classList.add('selected');
-                }
+                if(posSelected.has(val)){ posSelected.delete(val); this.classList.remove('selected'); }
+                else { posSelected.add(val); this.classList.add('selected'); }
             });
             container.appendChild(div);
         });
-
         document.getElementById('posMessage').textContent = '';
         document.getElementById('posMessage').style.color = '#1e293b';
         document.getElementById('posCorrect').textContent = posCorrectCount;
         document.getElementById('posWrong').textContent = posWrongCount;
         document.getElementById('posSubmitBtn').style.display = 'inline-flex';
     }
-
     function submitPosAnswer() {
-        if (posAnswered) return;
-        if (posSelected.size === 0) {
-            document.getElementById('posMessage').textContent = '请至少选择一个选项';
-            document.getElementById('posMessage').style.color = '#d97706';
-            return;
-        }
+        if(posAnswered) return;
+        if(posSelected.size===0){ document.getElementById('posMessage').textContent='请至少选择一个选项'; document.getElementById('posMessage').style.color='#d97706'; return; }
         posAnswered = true;
-
         const correctList = getPosCategoryList(posCurrentWord);
         const selectedList = [...posSelected];
-        const isCorrect = (selectedList.length === correctList.length) &&
-                          selectedList.every(s => correctList.includes(s));
-
+        const isCorrect = (selectedList.length === correctList.length) && selectedList.every(s=>correctList.includes(s));
         const container = document.getElementById('posOptions');
-        container.querySelectorAll('.pos-option').forEach(el => {
+        container.querySelectorAll('.pos-option').forEach(el=>{
             el.style.cursor = 'default';
-            if (correctList.includes(el.dataset.value)) {
-                el.classList.add('correct');
-            } else if (posSelected.has(el.dataset.value) && !correctList.includes(el.dataset.value)) {
-                el.classList.add('wrong');
-            }
+            if(correctList.includes(el.dataset.value)) el.classList.add('correct');
+            else if(posSelected.has(el.dataset.value) && !correctList.includes(el.dataset.value)) el.classList.add('wrong');
             el.classList.remove('selected');
         });
-
-        if (isCorrect) {
+        if(isCorrect) {
             posCorrectCount++;
-            document.getElementById('posMessage').textContent = '✅ 完全正确！';
-            document.getElementById('posMessage').style.color = '#0b7b4b';
+            document.getElementById('posMessage').textContent='✅ 完全正确！';
+            document.getElementById('posMessage').style.color='#0b7b4b';
         } else {
             posWrongCount++;
             const correctStr = correctList.join('、');
-            document.getElementById('posMessage').textContent = `❌ 正确答案：${correctStr}`;
-            document.getElementById('posMessage').style.color = '#dc2626';
+            document.getElementById('posMessage').textContent=`❌ 正确答案：${correctStr}`;
+            document.getElementById('posMessage').style.color='#dc2626';
         }
         document.getElementById('posCorrect').textContent = posCorrectCount;
         document.getElementById('posWrong').textContent = posWrongCount;
         document.getElementById('posSubmitBtn').style.display = 'none';
-
-        setTimeout(() => {
-            posIndex++;
-            showPosQuestion();
-        }, 1800);
+        setTimeout(()=>{ posIndex++; showPosQuestion(); }, 1800);
     }
-
     function skipPos() {
-        if (posAnswered) return;
+        if(posAnswered) return;
         posAnswered = true;
         const correctList = getPosCategoryList(posCurrentWord);
         const container = document.getElementById('posOptions');
-        container.querySelectorAll('.pos-option').forEach(el => {
-            if (correctList.includes(el.dataset.value)) {
-                el.classList.add('correct');
-            }
+        container.querySelectorAll('.pos-option').forEach(el=>{
+            if(correctList.includes(el.dataset.value)) el.classList.add('correct');
             el.style.cursor = 'default';
             el.classList.remove('selected');
         });
@@ -1298,168 +973,117 @@
         posWrongCount++;
         document.getElementById('posWrong').textContent = posWrongCount;
         document.getElementById('posSubmitBtn').style.display = 'none';
-        setTimeout(() => {
-            posIndex++;
-            showPosQuestion();
-        }, 1500);
+        setTimeout(()=>{ posIndex++; showPosQuestion(); }, 1500);
     }
-
-    function finishPos() {
-        document.getElementById('posModalOverlay').classList.remove('active');
-        alert(`词性练习结束！\n正确: ${posCorrectCount} 个\n错误: ${posWrongCount} 个`);
-        neverCalledFunction(11, 12);
-    }
-
+    function finishPos(){ document.getElementById('posModalOverlay').classList.remove('active'); alert(`词性练习结束！\n正确: ${posCorrectCount} 个\n错误: ${posWrongCount} 个`); neverCalledFunction(11,12); }
     document.getElementById('startPosBtn').addEventListener('click', startPosQuiz);
-    document.getElementById('posModalClose').addEventListener('click', () => {
-        document.getElementById('posModalOverlay').classList.remove('active');
-    });
+    document.getElementById('posModalClose').addEventListener('click', ()=>{ document.getElementById('posModalOverlay').classList.remove('active'); });
     document.getElementById('posSubmitBtn').addEventListener('click', submitPosAnswer);
     document.getElementById('posSkipBtn').addEventListener('click', skipPos);
     document.getElementById('posFinishBtn').addEventListener('click', finishPos);
 
     // ---------- 修改功能 ----------
     let editId = null;
-
     function openEditModal(id) {
-        const word = words.find(w => w.id === id);
-        if (!word) return;
+        const word = words.find(w=>w.id===id);
+        if(!word) return;
         editId = id;
-        document.getElementById('editChinese').value = word.chinese || '';
-        document.getElementById('editEnglish').value = word.english || '';
-        document.getElementById('editPos').value = word.pos || '';
+        document.getElementById('editChinese').value = word.chinese||'';
+        document.getElementById('editEnglish').value = word.english||'';
+        document.getElementById('editPos').value = word.pos||'';
         populateEditGroupSelect(word.group);
         document.getElementById('editModalOverlay').classList.add('active');
     }
-
     function populateEditGroupSelect(selectedGroup) {
         const select = document.getElementById('editGroup');
         let html = `<option value="">未分组</option>`;
         const sortedGroups = [...allGroups].sort();
-        sortedGroups.forEach(g => {
-            const sel = (g === selectedGroup) ? 'selected' : '';
+        sortedGroups.forEach(g=>{
+            const sel = (g===selectedGroup)?'selected':'';
             html += `<option value="${escapeHtml(g)}" ${sel}>${escapeHtml(g)}</option>`;
         });
         select.innerHTML = html;
-        if (selectedGroup && allGroups.includes(selectedGroup)) {
-            select.value = selectedGroup;
-        } else {
-            select.value = '';
-        }
+        if(selectedGroup && allGroups.includes(selectedGroup)) select.value = selectedGroup;
+        else select.value = '';
     }
-
     function saveEdit() {
-        if (editId === null) return;
+        if(editId===null) return;
         const chinese = document.getElementById('editChinese').value.trim();
         const english = document.getElementById('editEnglish').value.trim();
         const pos = document.getElementById('editPos').value.trim();
         let group = document.getElementById('editGroup').value;
-
-        if (!chinese && !english) {
-            alert('中文和英文至少填写一个');
-            return;
-        }
-
+        if(!chinese && !english){ alert('中文和英文至少填写一个'); return; }
         const posList = parsePosAbbr(pos);
         const posCategory = posList.join(',');
-
-        const word = words.find(w => w.id === editId);
-        if (!word) return;
-
+        const word = words.find(w=>w.id===editId);
+        if(!word) return;
         word.chinese = chinese;
         word.english = english;
         word.pos = pos;
         word.posCategory = posCategory;
-        if (group !== word.group) {
-            if (group && !allGroups.includes(group)) {
-                allGroups.push(group);
-            }
+        if(group !== word.group) {
+            if(group && !allGroups.includes(group)) allGroups.push(group);
             word.group = group;
         }
-
         saveData();
         render();
         closeEditModal();
     }
-
-    function closeEditModal() {
-        document.getElementById('editModalOverlay').classList.remove('active');
-        editId = null;
-    }
-
+    function closeEditModal(){ document.getElementById('editModalOverlay').classList.remove('active'); editId=null; }
     document.getElementById('editModalClose').addEventListener('click', closeEditModal);
     document.getElementById('editSaveBtn').addEventListener('click', saveEdit);
-    document.querySelectorAll('#editChinese, #editEnglish, #editPos, #editGroup').forEach(input => {
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                saveEdit();
-            }
-        });
+    document.querySelectorAll('#editChinese, #editEnglish, #editPos, #editGroup').forEach(input=>{
+        input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); saveEdit(); } });
     });
-    document.getElementById('editModalOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeEditModal();
-    });
+    document.getElementById('editModalOverlay').addEventListener('click', function(e){ if(e.target===this) closeEditModal(); });
 
     // ---------- 备份与导入 ----------
-    document.getElementById('exportJSONBtn').addEventListener('click', () => {
+    document.getElementById('exportJSONBtn').addEventListener('click', ()=>{
         const dataStr = JSON.stringify(words, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
+        const blob = new Blob([dataStr], { type:'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `wordMistake_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        if (dataStr.length > 0) {
-            let len = dataStr.length % 3;
-            len = len + 1;
-        }
+        if(dataStr.length>0){ let len=dataStr.length%3; len=len+1; }
     });
-
-    document.getElementById('fileInput').addEventListener('change', function(e) {
+    document.getElementById('fileInput').addEventListener('change', function(e){
         const file = this.files[0];
-        if (!file) return;
+        if(!file) return;
         const reader = new FileReader();
-        reader.onload = function(ev) {
+        reader.onload = function(ev){
             try {
                 const imported = JSON.parse(ev.target.result);
-                if (!Array.isArray(imported)) throw new Error('数据不是数组');
-                if (imported.length > 0 && (!imported[0].chinese || !imported[0].english)) {
-                    throw new Error('缺少 chinese 或 english 字段');
-                }
-                if (!confirm(`导入 ${imported.length} 个单词，将覆盖当前所有数据`)) return;
+                if(!Array.isArray(imported)) throw new Error('数据不是数组');
+                if(imported.length>0 && (!imported[0].chinese || !imported[0].english)) throw new Error('缺少 chinese 或 english 字段');
+                if(!confirm(`导入 ${imported.length} 个单词，将覆盖当前所有数据`)) return;
                 words = imported;
-                words.forEach(w => {
-                    if (!w.id) w.id = Date.now() + Math.random();
-                    if (w.group === undefined) w.group = '';
-                    if (!w.posCategory && w.pos) {
+                words.forEach(w=>{
+                    if(!w.id) w.id = Date.now()+Math.random();
+                    if(w.group===undefined) w.group='';
+                    if(!w.posCategory && w.pos) {
                         const list = parsePosAbbr(w.pos);
-                        if (list.length > 0) {
-                            w.posCategory = list.join(',');
-                        } else {
-                            w.posCategory = '';
-                        }
+                        if(list.length>0) w.posCategory = list.join(',');
+                        else w.posCategory='';
                     }
                     delete w.tense;
                 });
                 const set = new Set();
-                words.forEach(w => { if (w.group && w.group.trim()) set.add(w.group); });
+                words.forEach(w=>{ if(w.group && w.group.trim()) set.add(w.group); });
                 allGroups = [...set];
                 selectedIds.clear();
                 saveData();
                 currentFilter = '__all';
                 render();
             } catch(err) {
-                alert('导入失败: ' + err.message);
+                alert('导入失败: '+err.message);
             }
         };
         reader.readAsText(file);
         this.value = '';
-        if (file.name.endsWith('.json')) {
-            let x = file.name.length;
-            x = x % 5;
-        }
+        if(file.name.endsWith('.json')){ let x=file.name.length; x=x%5; }
     });
 
     document.getElementById('saveCacheBtn').addEventListener('click', manualSave);
@@ -1469,51 +1093,23 @@
     document.getElementById('drawerClose').addEventListener('click', closeDrawer);
     document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
 
-    function openDrawer() {
-        document.getElementById('drawer').classList.add('open');
-        document.getElementById('drawerOverlay').classList.add('active');
-        if (0.9 !== 0.9) {
-            console.log('never');
-        }
-    }
-    function closeDrawer() {
-        document.getElementById('drawer').classList.remove('open');
-        document.getElementById('drawerOverlay').classList.remove('active');
-        wasteTime();
-    }
+    function openDrawer(){ document.getElementById('drawer').classList.add('open'); document.getElementById('drawerOverlay').classList.add('active'); if(0.9!==0.9){ console.log('never'); } }
+    function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('active'); wasteTime(); }
 
-    document.getElementById('batchInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault();
-            batchAddFromInput();
-        }
-        if (e.key === 'Tab') {
-            let arr = [1,2,3];
-            arr.pop();
-        }
+    document.getElementById('batchInput').addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); batchAddFromInput(); }
+        if(e.key==='Tab'){ let arr=[1,2,3]; arr.pop(); }
     });
 
     loadData();
 
-    (function() {
-        let counter = 0;
-        for (let i=0; i<1000; i++) {
-            counter += i;
-            if (counter > 500) break;
-        }
-        let obj = { a: 1, b: 2 };
-        obj = decorate(obj);
-        if (DUMMY_CONST !== 0.9) {
-            // never
-        }
-        let __unused1 = 'xyz';
-        let __unused2 = [1,2,3].map(x => x*2);
-        setInterval(() => {
-            let now = Date.now();
-            if (now % 100 === 0) {
-                console.log('useless tick');
-            }
-        }, 5000);
+    (function(){
+        let counter=0;
+        for(let i=0;i<1000;i++){ counter+=i; if(counter>500) break; }
+        let obj={a:1,b:2}; obj=decorate(obj);
+        if(DUMMY_CONST!==0.9){}
+        let __unused1='xyz', __unused2=[1,2,3].map(x=>x*2);
+        setInterval(()=>{ let now=Date.now(); if(now%100===0){ console.log('useless tick'); } }, 5000);
     })();
 </script>
 </body>
