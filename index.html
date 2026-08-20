@@ -540,7 +540,6 @@
             tbody.innerHTML = filtered.map((w, idx) => {
                 const checked = selectedIds.has(w.id) ? 'checked' : '';
                 const posDisplay = w.pos || '无';
-                // 截断显示过长词性
                 const shortPos = posDisplay.length > 20 ? posDisplay.substring(0, 18) + '…' : posDisplay;
                 return `
                 <tr class="word-row">
@@ -1153,7 +1152,7 @@
     document.getElementById('spellSkipBtn').addEventListener('click', skipSpell);
     document.getElementById('spellFinishBtn').addEventListener('click', finishSpell);
 
-    // ---------- 词性选择题（英文考中文，多选） ----------
+    // ---------- 词性选择题 ----------
     let posWords = [], posIndex = 0, posCorrectCount = 0, posWrongCount = 0, posCurrentWord = null;
     let posAnswered = false;
     let posSelected = new Set();
